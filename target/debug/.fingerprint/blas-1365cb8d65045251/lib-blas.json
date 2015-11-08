@@ -1,0 +1,1 @@
+{"rustc":3157142462783541044,"target":6906848260105333332,"profile":2512772377220700060,"local":{"variant":"Precalculated","fields":["0.9.1"]},"features":"Some([\"blas-sys\", \"default\", \"openblas\"])","deps":[["blas-sys v0.2.1",18420968037951437302],["libc v0.2.1",15351804269730370979],["num v0.1.27",15169654077000979663]]}

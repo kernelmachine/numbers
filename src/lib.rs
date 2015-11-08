@@ -1,15 +1,23 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-#![feature(test)]
-extern crate lapack;
+#![feature(custom_derive)]
+// #![feature(test)]
+
 extern crate blas;
+extern crate lapack;
 extern crate rand;
-extern crate test;
+// extern crate test;
 
 use rand::{thread_rng, Rng};
 use std::iter::*;
 use std::cmp::*;
-#[derive(Debug, Clone)]
+
+trait MatrixMap {
+    fn matrix_map<Matrix, F>(&self, func : F) -> Matrix
+        where F: FnMut(f64) -> f64;
+
+}
+#[derive(Debug, Clone, Map)]
 pub struct Matrix {
     elements : Vec<f64>,
     row_size : usize,
@@ -27,9 +35,11 @@ impl PartialEq for Matrix {
 }
 
 impl Matrix{
+
     // create new Matrix
     fn new(e : Vec<f64>, r_size : usize, c_size : usize) -> Matrix{
-        if r_size * c_size != e.len(){
+
+        if (r_size * c_size) != e.len(){
             panic!("dimensions do not match length of vector.")
         }
 
@@ -39,7 +49,6 @@ impl Matrix{
             col_size : c_size,
             transpose : false,
         }
-
     }
 
     // creates matrix of zeros
@@ -64,7 +73,6 @@ impl Matrix{
             col_size : c_size,
             transpose : false,
         }
-
     }
 
     // map index in matrix to index in 1-d vector
@@ -90,10 +98,10 @@ impl Matrix{
             col_size : self.row_size,
             transpose : match self.transpose { true => false, false => true}
         }
-
     }
-    fn diagonal (&self) -> Vec<f64>{
 
+    // get the diagonal of a matrix.
+    fn diagonal (&self) -> Vec<f64>{
         let mut diag : Vec<f64> = Vec :: new();
         for elem in 1..min(self.row_size,self.col_size){
             diag.push(self.get_element(elem,elem));
@@ -125,11 +133,35 @@ impl Matrix{
     }
 }
 
+mod matrix_ops{
+    use super::Matrix;
+    use blas::*;
+    pub fn multiply(a : &mut Matrix, b : &mut Matrix) -> Matrix{
+            let m = a.row_size;
+            let n = b.col_size;
+
+            if a.col_size != b.row_size {
+                panic!("number of columns in A does not match number of rows in B");
+            }
+            let k = a.col_size;
+            let mut c = vec![0.0; m*n];
+            dgemm(b'N', b'N', m, n, k, 1.0, &mut a.elements, m, &mut b.elements,k, 0.0,&mut c, m);
+            Matrix {
+                elements : c,
+                row_size : m,
+                col_size : n,
+                transpose : false,
+            }
+    }
+
+
+}
 
 mod lp {
     use super::Matrix;
     use lapack::*;
     use std::cmp::*;
+    use super::matrix_ops::*;
     // get the eigenvalues of a matrix.
     pub fn eigenvalues(a : &mut Matrix) -> Vec<f64>{
         let n = a.row_size;
@@ -172,13 +204,39 @@ mod lp {
         &mut work, lwork, &mut info);
         return a.to_owned()
     }
+
+    pub fn singular_values(a : &mut Matrix) -> Vec<f64> {
+            let mut at =  a.transpose();
+            let mut adjoint_operator = multiply(a,&mut at);
+            return eigenvalues(&mut adjoint_operator)
+    }
+
+    pub fn svd(a : &mut Matrix) -> (Vec<f64>,Vec<f64>,Vec<f64>) {
+        let m = a.row_size;
+        let n = a.col_size;
+
+        let mut s = singular_values(a);
+        let ldu = m*4;
+        let mut u = vec![0.0; ldu*min(m,n)];
+
+        let ldvt = n*4;
+        let mut vt = vec![0.0;ldvt*n];
+
+        let lwork = max(max(1,3*min(m,n)+min(m,n)),5*min(m,n)) +1 ;
+        let mut work = vec![0.0; lwork];
+
+        let mut info = 0;
+        dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
+        return (u,s, vt)
+    }
 }
 
 #[cfg(test)]
 mod tests{
     use super::Matrix;
     use super::lp::*;
-    use test::Bencher;
+    use super::matrix_ops::*;
+    // use test::Bencher;
     #[test]
     fn test_zeros() {
         let row_size = 2;
@@ -218,14 +276,23 @@ mod tests{
             }
     }
 
-    #[bench]
-    fn bench_eig(ben : &mut Bencher){
+    #[test]
+    fn test_singular_values() {
         let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
-
-        ben.iter( ||eigenvalues(&mut mat.to_owned()))
-
-
+        let w = singular_values(&mut mat.to_owned());
+        println!("{:?}",w)
     }
+
+
+
+    // #[bench]
+    // fn bench_eig(ben : &mut Bencher){
+    //     let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+    //
+    //     ben.iter( ||eigenvalues(&mut mat.to_owned()))
+    //
+    //
+    // }
     #[test]
     fn test_lu_solve() {
         let mat = Matrix :: new(vec![-10.0,0.0,0.0,2.0],2,2);
@@ -233,14 +300,20 @@ mod tests{
         let w = lufact(&mut k);
         let mut b =  Matrix :: new(vec![1.0,2.0],2,1);
         lusolve(w, &mut b);
-        println!("{:?}",b.elements);
+    }
 
+    #[test]
+    fn test_multiply(){
+        let mut a = Matrix ::new(vec![1.0,2.0],2,1);
+        let mut b = Matrix ::new(vec![1.0,2.0],1,2);
+        let C = multiply(&mut a,&mut b);
+        println!("{:?}", C.elements)
     }
-    #[bench]
-    fn bench_lu_solve(ben : &mut Bencher){
-        let mat = Matrix :: new(vec![-10.0,0.0,0.0,2.0],2,2);
-        let mut k = mat.to_owned();
-        let mut b =  Matrix :: new(vec![1.0,2.0],2,1);
-        ben.iter( || lusolve(lufact(&mut k),&mut b))
-    }
+    // #[bench]
+    // fn bench_lu_solve(ben : &mut Bencher){
+    //     let mat = Matrix :: new(vec![-10.0,0.0,0.0,2.0],2,2);
+    //     let mut k = mat.to_owned();
+    //     let mut b =  Matrix :: new(vec![1.0,2.0],2,1);
+    //     ben.iter( || lusolve(lufact(&mut k),&mut b))
+    // }
 }
