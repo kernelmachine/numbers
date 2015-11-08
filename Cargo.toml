@@ -1,0 +1,9 @@
+[package]
+name = "matrix"
+version = "0.1.0"
+authors = ["suchin"]
+
+[dependencies]
+lapack="0.8.0"
+blas="0.9.0"
+rand="0.3"
