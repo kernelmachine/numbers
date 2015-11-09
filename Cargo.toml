@@ -6,4 +6,5 @@ authors = ["suchin"]
 [dependencies]
 blas="*"
 lapack="*"
-rand="0.3"
+rand="*"
+zipWith="*"

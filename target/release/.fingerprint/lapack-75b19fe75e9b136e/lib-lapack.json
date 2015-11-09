@@ -1,1 +1,0 @@
-{"rustc":3157142462783541044,"target":3340599841938992513,"profile":13400542009667194368,"local":{"variant":"Precalculated","fields":["0.8.0"]},"features":"Some([\"default\", \"lapack-sys\", \"openblas\"])","deps":[["lapack-sys v0.4.0",18369601832233967860],["libc v0.1.12",11346923751762877351],["num v0.1.27",1840021365572493785]]}

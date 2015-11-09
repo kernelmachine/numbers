@@ -6,18 +6,14 @@
 extern crate blas;
 extern crate lapack;
 extern crate rand;
+extern crate zipWith;
 // extern crate test;
 
 use rand::{thread_rng, Rng};
 use std::iter::*;
 use std::cmp::*;
 
-trait MatrixMap {
-    fn matrix_map<Matrix, F>(&self, func : F) -> Matrix
-        where F: FnMut(f64) -> f64;
-
-}
-#[derive(Debug, Clone, Map)]
+#[derive(Debug, Clone)]
 pub struct Matrix {
     elements : Vec<f64>,
     row_size : usize,
@@ -51,6 +47,9 @@ impl Matrix{
         }
     }
 
+
+
+
     // creates matrix of zeros
     fn zeros(r_size : usize, c_size : usize) -> Matrix{
         Matrix {
@@ -61,6 +60,8 @@ impl Matrix{
         }
 
     }
+
+
 
     // creates matrix of random elements
     fn random(r_size : usize, c_size : usize) -> Matrix{
@@ -73,6 +74,24 @@ impl Matrix{
             col_size : c_size,
             transpose : false,
         }
+    }
+
+    fn diag_mat(a : Vec<f64>) -> Matrix {
+        let mut mat = Matrix :: zeros(a.len(),a.len());
+        for i in 1..a.len()+1{
+            mat.replace(i, i, a[i-1]);
+        }
+        return mat
+    }
+
+    fn identity(row_size : usize) -> Matrix {
+        return  Matrix :: diag_mat(vec![1.0; row_size])
+    }
+
+
+    fn replace(&mut self,row: usize, col:usize, value : f64) -> () {
+        let ind = self.get_ind(row,col);
+        self.elements[ind] = value;
     }
 
     // map index in matrix to index in 1-d vector
@@ -110,32 +129,48 @@ impl Matrix{
     }
 
 
-    fn tri (&self){
-        unimplemented!()
-
+    fn tri (row_size:usize, col_size : usize, k : usize, upper_or_lower : u8) -> Matrix{
+        let mut mat = Matrix :: zeros(row_size, col_size);
+        for i in 1..row_size+1{
+            for j in 1..col_size+1{
+                match upper_or_lower{
+                    b'U' =>{
+                        match i <= j + k{
+                            true => mat.replace(i,j,1.0),
+                            false => continue
+                        }
+                    }
+                    b'L' => {
+                        match i >= j + k{
+                            true => mat.replace(i,j,1.0),
+                            false => continue
+                        }
+                    }
+                    _ => {
+                        panic!("upper_or_lower parameter must be U or L");
+                    }
+                }
+            }
+        }
+        mat
     }
 
-    fn triu (&self){
-        unimplemented!()
-
-    }
-
-
-    fn tril (&self){
-        unimplemented!()
-
-    }
 
 
     // get a submatrix from a matrix.
     fn submatrix(&self, start : (usize,usize), dim : (usize,usize)) -> Matrix {
     unimplemented!();
     }
+
+
 }
 
 mod matrix_ops{
     use super::Matrix;
     use blas::*;
+    use zipWith::IntoZipWith;
+    use std::iter::Iterator;
+
     pub fn multiply(a : &mut Matrix, b : &mut Matrix) -> Matrix{
             let m = a.row_size;
             let n = b.col_size;
@@ -154,6 +189,42 @@ mod matrix_ops{
             }
     }
 
+    pub fn matrix_map(func : &Fn(&f64) -> f64, a : &mut Matrix) -> Matrix{
+            Matrix {
+                elements: a.elements.iter().map(func).collect(),
+                row_size : a.row_size,
+                col_size : a.col_size,
+                transpose : false,
+            }
+    }
+
+    pub fn hadamard(a: &mut Matrix, b :&mut Matrix ) -> Matrix{
+
+        if a.row_size != b.row_size || a.col_size != b.col_size {
+            panic!("dimensions of A does not match dimensions of B");
+        }
+        println!("{:?}", a.elements);
+        println!("{:?}",b.elements);
+        Matrix {
+            elements : a.elements.to_owned().zip_with(b.to_owned().elements, |x,y| x*y).collect(),
+            row_size : a.row_size,
+            col_size : b.col_size,
+            transpose : false
+        }
+
+
+    }
+
+    pub fn triu(a: &mut Matrix, k: usize ) -> Matrix{
+        let mut tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
+        return hadamard(&mut tri_mat, a)
+    }
+
+    pub fn tril(a: &mut Matrix, k: usize ) -> Matrix{
+        let mut tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
+        return hadamard(&mut tri_mat, a)
+    }
+
 
 }
 
@@ -162,16 +233,26 @@ mod lp {
     use lapack::*;
     use std::cmp::*;
     use super::matrix_ops::*;
+
     // get the eigenvalues of a matrix.
-    pub fn eigenvalues(a : &mut Matrix) -> Vec<f64>{
+    pub fn eigenvalues(a : &mut Matrix) -> Matrix{
         let n = a.row_size;
         let mut w = vec![0.0; n];
         let mut work = vec![0.0; 4 * n];
         let lwork = 4 * n as isize;
         let mut info = 0;
         dsyev(b'V', b'U', n, &mut a.elements, n, &mut w, &mut work, lwork, &mut info);
-        return w
-    }
+        Matrix {
+            elements : w.to_owned(),
+            row_size : w.len(),
+            col_size : 1,
+            transpose : false,
+        }
+
+
+            }
+
+
 
     pub fn lufact(a : &mut Matrix) -> (&mut Matrix, Vec<i32>) {
         let m = a.row_size;
@@ -205,29 +286,46 @@ mod lp {
         return a.to_owned()
     }
 
-    pub fn singular_values(a : &mut Matrix) -> Vec<f64> {
+    pub fn singular_values(a : &mut Matrix) -> Matrix {
             let mut at =  a.transpose();
             let mut adjoint_operator = multiply(a,&mut at);
-            return eigenvalues(&mut adjoint_operator)
+            let mut e = eigenvalues(&mut adjoint_operator);
+            return matrix_map(&|x : &f64| x.sqrt(), &mut e)
     }
 
-    pub fn svd(a : &mut Matrix) -> (Vec<f64>,Vec<f64>,Vec<f64>) {
+    pub fn svd(a : &mut Matrix) -> (Matrix, Matrix, Matrix) {
         let m = a.row_size;
         let n = a.col_size;
 
         let mut s = singular_values(a);
-        let ldu = m*4;
+        let ldu = m;
         let mut u = vec![0.0; ldu*min(m,n)];
 
-        let ldvt = n*4;
+        let ldvt = n;
         let mut vt = vec![0.0;ldvt*n];
 
         let lwork = max(max(1,3*min(m,n)+min(m,n)),5*min(m,n)) +1 ;
         let mut work = vec![0.0; lwork];
 
         let mut info = 0;
-        dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
-        return (u,s, vt)
+        dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s.elements, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
+
+        (
+            Matrix {
+                elements : u,
+                row_size : n,
+                col_size : ldu,
+                transpose : false,
+            },
+            Matrix :: diag_mat(s.elements)
+            ,
+            Matrix {
+                elements : vt,
+                row_size : n,
+                col_size : ldvt,
+                transpose : true,
+            }
+        )
     }
 }
 
@@ -267,21 +365,29 @@ mod tests{
 
     #[test]
     fn test_eigenvalues() {
-        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
-        let w = eigenvalues(&mut mat.to_owned());
-
-        //tests will probably have to incorporate some semblence of error < eps...
-        for (one, another) in w.iter().zip(&[2.0, 2.0, 5.0]) {
-                assert!((one - another).abs() < 1e-14);
-            }
-    }
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let w = svd(&mut mat);
+        }
 
     #[test]
     fn test_singular_values() {
         let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
         let w = singular_values(&mut mat.to_owned());
+    }
+
+    #[test]
+    fn test_svd() {
+        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let w = singular_values(&mut mat.to_owned());
+    }
+
+    #[test]
+    fn test_tri() {
+        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let w =tril(&mut mat.to_owned(),0);
         println!("{:?}",w)
     }
+
 
 
 
@@ -306,8 +412,8 @@ mod tests{
     fn test_multiply(){
         let mut a = Matrix ::new(vec![1.0,2.0],2,1);
         let mut b = Matrix ::new(vec![1.0,2.0],1,2);
-        let C = multiply(&mut a,&mut b);
-        println!("{:?}", C.elements)
+        let c = multiply(&mut a,&mut b);
+        // println!("{:?}", c.elements)
     }
     // #[bench]
     // fn bench_lu_solve(ben : &mut Bencher){
