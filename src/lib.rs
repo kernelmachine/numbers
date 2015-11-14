@@ -15,13 +15,94 @@ use std::iter::*;
 use std::cmp::*;
 use std::ops::{Add, Sub, Mul, Div};
 use num::traits::{Num, Zero, One};
+use zipWith::IntoZipWith;
+//
+// pub enum Matrix <T: Num> {
+//     Zeros { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
+//     Ones { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
+//     Diagonal { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
+//     Random { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
+//     Identity { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
+//     Triangular { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
+// }
+// impl <T:Num> Matrix::Zeros {
+//     fn new(r_size : usize, c_size : usize) -> Matrix<T>{
+//         Matrix {
+//             elements : vec![Zero::zero();r_size*c_size],
+//             row_size : r_size,
+//             col_size : c_size,
+//             transpose : false,
+//         }
+//     }
+//
+// }
+//
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Matrix <T : Num> {
     elements : Vec<T>,
     row_size : usize,
     col_size : usize,
     transpose :  bool,
+}
+
+// impl <T:Num> Zero for Matrix<T>{
+//     fn zero() -> Self {
+//         unimplemented!()
+//     }
+// }
+//
+// impl <T:Num> One for Matrix<T> {
+//     fn one() {
+//         unimplemented!()
+//     }
+// }
+
+
+impl<'a, 'b, T : Num> Add<&'b Matrix<T>> for &'a Matrix<T> {
+    type Output = Matrix<T>;
+
+    fn add(self, other: &'b Matrix<T>) -> Matrix<T> {
+        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x+y).collect(),
+        row_size : self.row_size,
+        col_size : other.col_size,
+        transpose : false}
+    }
+}
+
+impl<'a, 'b, T: Num> Sub<&'b Matrix<T>> for &'a Matrix<T> {
+    type Output = Matrix<T>;
+
+    fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
+        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x-y).collect(),
+        row_size : self.row_size,
+        col_size : other.col_size,
+        transpose : false}
+    }
+}
+
+impl<'a, 'b, T: Num> Div<&'b Matrix<T>> for &'a Matrix<T> {
+    type Output = Matrix<T>;
+
+    fn div(self, other: &'b Matrix<T>) -> Matrix<T> {
+        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x/y).collect(),
+        row_size : self.row_size,
+        col_size : other.col_size,
+        transpose : false}
+    }
+}
+
+
+
+impl<'a, 'b, T: Num> Mul<&'b Matrix<T>> for &'a Matrix<T> {
+    type Output = Matrix<T>;
+
+    fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
+        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x*y).collect(),
+        row_size : self.row_size,
+        col_size : other.col_size,
+        transpose : false}
+    }
 }
 
 impl <T: Num> PartialEq for Matrix<T>{
@@ -52,7 +133,7 @@ impl <T:Num > Matrix <T>{
     }
 
     // creates matrix of zeros
-    fn zeros(r_size : usize, c_size : usize) -> Matrix<T>{
+    fn zeros (r_size : usize, c_size : usize) -> Matrix<T>{
         Matrix {
             elements : vec![Zero::zero();r_size*c_size],
             row_size : r_size,
@@ -74,7 +155,7 @@ impl <T:Num > Matrix <T>{
         }
     }
 
-    fn diag_mat(a : Vec<T>) -> Matrix<T> {
+    fn diag_mat (a : Vec<T>) -> Matrix<T> {
         let mut mat = Matrix :: zeros(a.len(),a.len());
         for i in 1..a.len()+1{
             mat.replace(i, i, a[i-1]);
@@ -165,7 +246,7 @@ mod operations{
     use super::Matrix;
     use std :: ops :: {Add, Sub, Mul, Div};
     use blas::*;
-    use zipWith::*;
+    use zipWith::IntoZipWith;
     use num::traits::Num;
 
     pub fn dot<T : Num> (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Matrix<f64>{
