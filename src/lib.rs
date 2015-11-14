@@ -39,7 +39,7 @@ use zipWith::IntoZipWith;
 //
 
 #[derive(Debug, Clone)]
-pub struct Matrix <T : Num> {
+pub struct Matrix <T : Num + Clone > {
     elements : Vec<T>,
     row_size : usize,
     col_size : usize,
@@ -59,7 +59,7 @@ pub struct Matrix <T : Num> {
 // }
 
 
-impl<'a, 'b, T : Num> Add<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone> Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn add(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -70,7 +70,7 @@ impl<'a, 'b, T : Num> Add<&'b Matrix<T>> for &'a Matrix<T> {
     }
 }
 
-impl<'a, 'b, T: Num> Sub<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone> Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -81,7 +81,7 @@ impl<'a, 'b, T: Num> Sub<&'b Matrix<T>> for &'a Matrix<T> {
     }
 }
 
-impl<'a, 'b, T: Num> Div<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone> Div<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn div(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -94,7 +94,7 @@ impl<'a, 'b, T: Num> Div<&'b Matrix<T>> for &'a Matrix<T> {
 
 
 
-impl<'a, 'b, T: Num> Mul<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone> Mul<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -105,7 +105,7 @@ impl<'a, 'b, T: Num> Mul<&'b Matrix<T>> for &'a Matrix<T> {
     }
 }
 
-impl <T: Num> PartialEq for Matrix<T>{
+impl <T : Num + Clone> PartialEq for Matrix<T>{
     fn eq(&self, other: &Matrix<T>) -> bool {
          (self.elements == other.elements)
        & (self.row_size == other.row_size)
@@ -115,7 +115,7 @@ impl <T: Num> PartialEq for Matrix<T>{
 }
 
 
-impl <T:Num > Matrix <T>{
+impl <T:Num + Clone> Matrix <T>{
 
     // create new Matrix
     fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Matrix<T>{
@@ -249,7 +249,7 @@ mod operations{
     use zipWith::IntoZipWith;
     use num::traits::Num;
 
-    pub fn dot<T : Num> (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Matrix<f64>{
+    pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Matrix<f64>{
             let m = a.row_size;
             let n = b.col_size;
 
@@ -267,7 +267,7 @@ mod operations{
             }
     }
 
-    pub fn matrix_map <T: Num> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Matrix<T>{
+    pub fn matrix_map <T: Num + Clone> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Matrix<T>{
            Matrix {
                elements: a.elements.iter().map(func).collect(),
                row_size : a.row_size,
@@ -276,7 +276,7 @@ mod operations{
            }
    }
 
-    pub fn hadamard<T : Num>(a: &mut Matrix<T>, b :&mut Matrix<T> ) -> Matrix<T>{
+    pub fn hadamard<T : Num + Clone>(a: &mut Matrix<T>, b :&mut Matrix<T> ) -> Matrix<T>{
 
         if a.row_size != b.row_size || a.col_size != b.col_size {
             panic!("dimensions of A does not match dimensions of B");
@@ -290,12 +290,12 @@ mod operations{
         }
 
     }
-    pub fn triu<T : Num>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
+    pub fn triu<T : Num + Clone>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
         let mut tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
         hadamard(&mut tri_mat, a)
     }
 
-    pub fn tril<T : Num>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
+    pub fn tril<T : Num + Clone>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
         let mut tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
         hadamard(&mut tri_mat, a)
     }
