@@ -11,32 +11,11 @@ extern crate num;
 // extern crate test;
 
 use rand::{thread_rng, Rng};
-use std::iter::*;
 use std::cmp::*;
 use std::ops::{Add, Sub, Mul, Div};
 use num::traits::{Num, Zero, One};
 use zipWith::IntoZipWith;
-//
-// pub enum Matrix <T: Num> {
-//     Zeros { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
-//     Ones { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
-//     Diagonal { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
-//     Random { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
-//     Identity { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
-//     Triangular { elements : Vec<T>, row_size : usize,col_size : usize, transpose : bool},
-// }
-// impl <T:Num> Matrix::Zeros {
-//     fn new(r_size : usize, c_size : usize) -> Matrix<T>{
-//         Matrix {
-//             elements : vec![Zero::zero();r_size*c_size],
-//             row_size : r_size,
-//             col_size : c_size,
-//             transpose : false,
-//         }
-//     }
-//
-// }
-//
+
 
 #[derive(Debug, Clone)]
 pub struct Matrix <T : Num + Clone > {
@@ -45,18 +24,6 @@ pub struct Matrix <T : Num + Clone > {
     col_size : usize,
     transpose :  bool,
 }
-
-// impl <T:Num> Zero for Matrix<T>{
-//     fn zero() -> Self {
-//         unimplemented!()
-//     }
-// }
-//
-// impl <T:Num> One for Matrix<T> {
-//     fn one() {
-//         unimplemented!()
-//     }
-// }
 
 
 impl<'a, 'b, T : Num + Clone> Add<&'b Matrix<T>> for &'a Matrix<T> {
@@ -94,7 +61,7 @@ impl<'a, 'b, T : Num + Clone> Div<&'b Matrix<T>> for &'a Matrix<T> {
 
 
 
-impl<'a, 'b, T : Num + Clone> Mul<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone> Mul <&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -247,7 +214,6 @@ impl <T:Num + Clone> Matrix <T>{
 mod operations{
     use super::Matrix;
     use blas::*;
-    use zipWith::IntoZipWith;
     use num::traits::Num;
 
     pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Matrix<f64>{
@@ -277,28 +243,15 @@ mod operations{
            }
    }
 
-    pub fn hadamard<T : Num + Clone>(a: &mut Matrix<T>, b :&mut Matrix<T> ) -> Matrix<T>{
 
-        if a.row_size != b.row_size || a.col_size != b.col_size {
-            panic!("dimensions of A does not match dimensions of B");
-        }
-
-        Matrix {
-            elements : a.elements.clone().zip_with(b.elements.clone(), |x,y| x*y).collect(),
-            row_size : a.row_size,
-            col_size : b.col_size,
-            transpose : false
-        }
-
-    }
     pub fn triu<T : Num + Clone>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
-        let mut tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
-        hadamard(&mut tri_mat, a)
+        let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
+        &tri_mat *&a
     }
 
     pub fn tril<T : Num + Clone>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
-        let mut tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
-        hadamard(&mut tri_mat, a)
+        let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
+        &tri_mat *&a
     }
 
 
@@ -471,8 +424,29 @@ mod tests{
     fn test_tri() {
         let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
         let w =tril(&mut mat,0);
-        println!("{:?}",w)
     }
+
+    #[test]
+    fn test_add() {
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        assert_eq!(&mat + &mat, matrix_map(&|&x| x + x, &mut mat))
+    }
+
+    #[test]
+    fn test_sub() {
+        let mat = Matrix :: new(vec![3, 1, 1, 1, 3, 1, 1, 1, 3], 3, 3);
+        assert_eq!(&mat - &mat,Matrix :: zeros(3,3))
+    }
+
+
+
+    #[test]
+    fn test_mul() {
+        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: false };
+        assert_eq!(&mat * &mat, ans)
+    }
+
 
 
 
@@ -503,7 +477,9 @@ mod tests{
 
     #[test]
     fn test_map(){
-        let  a = Matrix ::new(vec![1.0,2.0],2,1);
+        let mut a : Matrix <f64> = Matrix ::new(vec![1.0,2.0],2,1);
+        let v = matrix_map(&|&x| x+2.0, &mut a);
+        assert_eq!(Matrix ::new(vec![3.0,4.0],2,1), v)
     }
     // #[bench]
     // fn bench_lu_solve(ben : &mut Bencher){
