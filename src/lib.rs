@@ -62,8 +62,8 @@ pub struct Matrix <T : Num + Clone > {
 impl<'a, 'b, T : Num + Clone> Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
-    fn add(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x+y).collect(),
+    fn add(self, other: &Matrix<T>) -> Matrix<T> {
+        Matrix {elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x+y).collect(),
         row_size : self.row_size,
         col_size : other.col_size,
         transpose : false}
@@ -74,7 +74,7 @@ impl<'a, 'b, T : Num + Clone> Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x-y).collect(),
+        Matrix {elements : self.elements.clone().zip_with(other.clone().elements, |x,y| x-y).collect(),
         row_size : self.row_size,
         col_size : other.col_size,
         transpose : false}
@@ -85,7 +85,7 @@ impl<'a, 'b, T : Num + Clone> Div<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn div(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x/y).collect(),
+        Matrix {elements :  self.elements.clone().zip_with(other.clone().elements, |x,y| x/y).collect(),
         row_size : self.row_size,
         col_size : other.col_size,
         transpose : false}
@@ -98,7 +98,7 @@ impl<'a, 'b, T : Num + Clone> Mul<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.zip_with(other.elements, |x,y| x*y).collect(),
+        Matrix {elements : self.elements.clone().zip_with(other.clone().elements, |x,y| x*y).collect(),
         row_size : self.row_size,
         col_size : other.col_size,
         transpose : false}
@@ -158,7 +158,8 @@ impl <T:Num + Clone> Matrix <T>{
     fn diag_mat (a : Vec<T>) -> Matrix<T> {
         let mut mat = Matrix :: zeros(a.len(),a.len());
         for i in 1..a.len()+1{
-            mat.replace(i, i, a[i-1]);
+            let e = &a[i-1];
+            mat.replace(i, i, e.to_owned());
         }
         return mat
     }
@@ -183,7 +184,8 @@ impl <T:Num + Clone> Matrix <T>{
 
     // get an element from the matrix
     fn get_element(&self, row : usize, col : usize) -> T{
-        return self.elements[self.get_ind(row,col)]
+        let elem = &self.elements[self.get_ind(row,col)];
+        return elem.to_owned()
     }
 
 
@@ -191,7 +193,7 @@ impl <T:Num + Clone> Matrix <T>{
     // we just flag the matrix as transpose to change pointer reference to elements.
     fn transpose(&self) -> Matrix<T> {
         Matrix {
-            elements : self.elements,
+            elements : self.elements.clone(),
             row_size : self.col_size,
             col_size : self.row_size,
             transpose : match self.transpose { true => false, false => true}
@@ -244,7 +246,6 @@ impl <T:Num + Clone> Matrix <T>{
 
 mod operations{
     use super::Matrix;
-    use std :: ops :: {Add, Sub, Mul, Div};
     use blas::*;
     use zipWith::IntoZipWith;
     use num::traits::Num;
@@ -283,7 +284,7 @@ mod operations{
         }
 
         Matrix {
-            elements : a.elements.zip_with(b.elements, |x,y| x*y).collect(),
+            elements : a.elements.clone().zip_with(b.elements.clone(), |x,y| x*y).collect(),
             row_size : a.row_size,
             col_size : b.col_size,
             transpose : false
@@ -424,7 +425,7 @@ mod tests{
     fn test_zeros() {
         let row_size = 2;
         let column_size = 2;
-        let mat = Matrix::zeros(row_size,column_size);
+        let mat : Matrix <f64> = Matrix::zeros(row_size,column_size);
         assert_eq!(mat.elements, [0.0,0.0,0.0,0.0])
     }
 
@@ -456,19 +457,19 @@ mod tests{
 
     #[test]
     fn test_singular_values() {
-        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
         let w = singular_values(&mut mat);
     }
 
     #[test]
     fn test_svd() {
-        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
         let w = singular_values(&mut mat);
     }
 
     #[test]
     fn test_tri() {
-        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
         let w =tril(&mut mat,0);
         println!("{:?}",w)
     }
@@ -502,7 +503,7 @@ mod tests{
 
     #[test]
     fn test_map(){
-        let mut a = Matrix ::new(vec![1.0,2.0],2,1);
+        let  a = Matrix ::new(vec![1.0,2.0],2,1);
     }
     // #[bench]
     // fn bench_lu_solve(ben : &mut Bencher){
