@@ -1,16 +1,16 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![feature(custom_derive)]
-// #![feature(test)]
+#![feature(test)]
 
 extern crate blas;
 extern crate lapack;
 extern crate rand;
 extern crate zipWith;
 extern crate num;
-// extern crate test;
+extern crate test;
 
-use rand::{thread_rng, Rng};
+use rand::{thread_rng, Rng, Rand};
 use std::cmp::*;
 use std::ops::{Add, Sub, Mul, Div};
 use num::traits::{Num, Zero, One};
@@ -18,7 +18,7 @@ use zipWith::IntoZipWith;
 
 
 #[derive(Debug, Clone)]
-pub struct Matrix <T : Num + Clone > {
+pub struct Matrix <T : Num + Clone + Rand> {
     elements : Vec<T>,
     row_size : usize,
     col_size : usize,
@@ -26,7 +26,7 @@ pub struct Matrix <T : Num + Clone > {
 }
 
 
-impl<'a, 'b, T : Num + Clone> Add<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone + Rand> Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn add(self, other: &Matrix<T>) -> Matrix<T> {
@@ -37,7 +37,7 @@ impl<'a, 'b, T : Num + Clone> Add<&'b Matrix<T>> for &'a Matrix<T> {
     }
 }
 
-impl<'a, 'b, T : Num + Clone> Sub<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone + Rand> Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -48,7 +48,7 @@ impl<'a, 'b, T : Num + Clone> Sub<&'b Matrix<T>> for &'a Matrix<T> {
     }
 }
 
-impl<'a, 'b, T : Num + Clone> Div<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone + Rand> Div<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn div(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -61,7 +61,7 @@ impl<'a, 'b, T : Num + Clone> Div<&'b Matrix<T>> for &'a Matrix<T> {
 
 
 
-impl<'a, 'b, T : Num + Clone> Mul <&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T : Num + Clone + Rand> Mul <&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
 
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -72,7 +72,7 @@ impl<'a, 'b, T : Num + Clone> Mul <&'b Matrix<T>> for &'a Matrix<T> {
     }
 }
 
-impl <T : Num + Clone> PartialEq for Matrix<T>{
+impl <T : Num + Clone + Rand> PartialEq for Matrix<T>{
     fn eq(&self, other: &Matrix<T>) -> bool {
          (self.elements == other.elements)
        & (self.row_size == other.row_size)
@@ -82,7 +82,7 @@ impl <T : Num + Clone> PartialEq for Matrix<T>{
 }
 
 
-impl <T:Num + Clone> Matrix <T>{
+impl <T:Num + Clone + Rand> Matrix <T>{
 
     // create new Matrix
     fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Matrix<T>{
@@ -110,12 +110,14 @@ impl <T:Num + Clone> Matrix <T>{
     }
 
     // creates matrix of random elements
-    fn random(r_size : usize, c_size : usize) -> Matrix<f64>{
+    fn random(r_size : usize, c_size : usize) -> Matrix<T>{
+        let e = rand::thread_rng()
+        .gen_iter::<T>()
+        .take(r_size*c_size)
+        .collect::<Vec<T>>();
+
         Matrix {
-            elements : rand::thread_rng()
-            .gen_iter::<f64>()
-            .take(r_size*c_size)
-            .collect::<Vec<f64>>(),
+            elements : e,
             row_size : r_size,
             col_size : c_size,
             transpose : false,
@@ -215,7 +217,7 @@ mod operations{
     use super::Matrix;
     use blas::*;
     use num::traits::Num;
-
+    use rand :: Rand;
     pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Matrix<f64>{
             let m = a.row_size;
             let n = b.col_size;
@@ -234,7 +236,7 @@ mod operations{
             }
     }
 
-    pub fn matrix_map <T: Num + Clone> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Matrix<T>{
+    pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Matrix<T>{
            Matrix {
                elements: a.elements.iter().map(func).collect(),
                row_size : a.row_size,
@@ -244,12 +246,12 @@ mod operations{
    }
 
 
-    pub fn triu<T : Num + Clone>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
+    pub fn triu<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
         let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
         &tri_mat *&a
     }
 
-    pub fn tril<T : Num + Clone>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
+    pub fn tril<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
         let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
         &tri_mat *&a
     }
@@ -373,7 +375,7 @@ mod tests{
     use super::Matrix;
     use super::lp::*;
     use super::operations::*;
-    // use test::Bencher;
+    use test::Bencher;
     #[test]
     fn test_zeros() {
         let row_size = 2;
@@ -416,7 +418,7 @@ mod tests{
 
     #[test]
     fn test_svd() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mut mat = Matrix ::random(10,10);
         let w = singular_values(&mut mat);
     }
 
@@ -429,7 +431,7 @@ mod tests{
     #[test]
     fn test_add() {
         let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
-        assert_eq!(&mat + &mat, matrix_map(&|&x| x + x, &mut mat))
+        assert_eq!(&mat + &mat, matrix_map(&|&x| x + x, &mut mat));
     }
 
     #[test]
@@ -448,22 +450,11 @@ mod tests{
     }
 
 
-
-
-
-    // #[bench]
-    // fn bench_eig(ben : &mut Bencher){
-    //     let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
-    //
-    //     ben.iter( ||eigenvalues(&mut mat.to_owned()))
-    //
-    //
-    // }
     #[test]
     fn test_lu_solve() {
-        let mat = &mut Matrix :: new(vec![-10.0,0.0,0.0,2.0],2,2);
+        let mat = &mut Matrix :: random(10000,10000);
         let w = lufact(mat);
-        let mut b =  Matrix :: new(vec![1.0,2.0],2,1);
+        let mut b =  Matrix :: random(10000,1);
         lusolve(w, &mut b);
     }
 
@@ -477,10 +468,21 @@ mod tests{
 
     #[test]
     fn test_map(){
-        let mut a : Matrix <f64> = Matrix ::new(vec![1.0,2.0],2,1);
+        let mut a = Matrix ::random(10,10);
         let v = matrix_map(&|&x| x+2.0, &mut a);
-        assert_eq!(Matrix ::new(vec![3.0,4.0],2,1), v)
+        assert_eq!(Matrix ::new(vec![3.0,4.0],2,1), v);
     }
+
+    // }
+
+    // #[bench]
+    // fn bench_eig(ben : &mut Bencher){
+    //     let mut mat = Matrix ::random(10000,10000);
+    //     ben.iter( ||lufact(&mut mat))
+    //
+    //
+    // }
+
     // #[bench]
     // fn bench_lu_solve(ben : &mut Bencher){
     //     let mat = Matrix :: new(vec![-10.0,0.0,0.0,2.0],2,2);
