@@ -452,7 +452,7 @@ mod tests{
 
     #[test]
     fn test_lu_solve() {
-        let mat = &mut Matrix :: random(10000,10000);
+        let mat = &mut Matrix :: random(10,10);
         let w = lufact(mat);
         let mut b =  Matrix :: random(10000,1);
         lusolve(w, &mut b);
@@ -475,12 +475,30 @@ mod tests{
 
     // }
 
-    // #[bench]
-    // fn bench_eig(ben : &mut Bencher){
-    //     let mut mat = Matrix ::random(10000,10000);
-    //     ben.iter( ||lufact(&mut mat))
-    //
-    //
+    #[bench]
+    fn bench_eig(ben : &mut Bencher){
+        let i = 250;
+        let mut mat = Matrix ::random(i,i);
+        // let mut mat1= Matrix ::random(i,i);
+        ben.iter( ||eigenvalues(&mut mat))
+    }
+    #[bench]
+    fn bench_dot(ben : &mut Bencher){
+        let i = 500;
+        let mut mat = Matrix ::random(i,i);
+        let mut mat1= Matrix ::random(i,i);
+        ben.iter( ||dot(&mut mat, &mut mat1))
+    }
+    #[bench]
+    fn bench_svd(ben : &mut Bencher){
+        let i = 500;
+        let mut mat = Matrix ::random(i,i);
+        ben.iter( ||svd(&mut mat))
+
+}
+
+}
+
     // }
 
     // #[bench]
@@ -490,4 +508,3 @@ mod tests{
     //     let mut b =  Matrix :: new(vec![1.0,2.0],2,1);
     //     ben.iter( || lusolve(lufact(&mut k),&mut b))
     // }
-}
