@@ -285,6 +285,11 @@ mod operations{
         &tri_mat *&a
     }
 
+    pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
+        unimplemented!()
+
+    }
+
 
 }
 
@@ -334,6 +339,7 @@ mod lp {
 
 
     }
+
 
     pub fn lusolve(lufact : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Result<Matrix<f64>,MatrixError>{
         let (a,mut ipiv) = lufact;
@@ -444,6 +450,7 @@ mod tests{
     use super::lp::*;
     use super::operations::*;
     use test::Bencher;
+
     #[test]
     fn test_zeros() {
         let row_size = 2;
@@ -456,34 +463,40 @@ mod tests{
     fn test_get_element() {
         let row_size = 2;
         let column_size = 2;
-        let mat = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size).unwrap();
-        let element = mat.get_element(1,2);
-        assert_eq!(2.0, element);
-        let element = mat.transpose().get_element(1,2);
-        assert_eq!(3.0, element)
+        if let Ok(mat) = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size){
+            let element = mat.get_element(1,2);
+            assert_eq!(2.0, element);
+            let element = mat.transpose().get_element(1,2);
+            assert_eq!(3.0, element)
+        }
     }
 
     #[test]
     fn test_transpose() {
         let row_size = 2;
         let column_size = 2;
-        let mat = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size).unwrap();
-        let mat_t = mat.transpose().transpose();
-        assert_eq!(mat_t,mat)
+        if let Ok(mat) =  Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size) {
+            let mat_t = mat.transpose().transpose();
+            assert_eq!(mat_t,mat)
+        }
+
     }
 
     #[test]
     fn test_eigenvalues() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
-        let w = eigenvalues(&mut mat);
-        assert_eq!(1,1);
+        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
+            let w = eigenvalues(&mut mat);
+            assert_eq!(1,1);
+        }
+
         }
 
     #[test]
     fn test_singular_values() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
-        let w = singular_values(&mut mat);
-        assert_eq!(1,1);
+        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
+            let w = singular_values(&mut mat);
+            assert_eq!(1,1);
+        }
     }
 
     #[test]
@@ -495,49 +508,57 @@ mod tests{
 
     #[test]
     fn test_tri() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
-        let w =tril(&mut mat,0).ok();
-        assert_eq!(1,1);
+        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
+            let w =tril(&mut mat,0).ok();
+            assert_eq!(1,1);
+        }
     }
 
     #[test]
     fn test_add() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
-        assert_eq!((&mat + &mat).ok(), matrix_map(&|&x| x + x, &mut mat).ok());
+        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
+            assert_eq!((&mat + &mat).ok(), matrix_map(&|&x| x + x, &mut mat).ok());
+        }
     }
 
     #[test]
     fn test_sub() {
-        let mat = Matrix :: new(vec![3, 1, 1, 1, 3, 1, 1, 1, 3], 3, 3).unwrap();
-        assert_eq!((&mat - &mat).ok(),Some(Matrix :: zeros(3,3)))
+        if let Ok(mat) =  Matrix :: new(vec![3, 1, 1, 1, 3, 1, 1, 1, 3], 3, 3){
+            assert_eq!((&mat - &mat).ok(),Some(Matrix :: zeros(3,3)))
+        }
     }
 
 
 
     #[test]
     fn test_mul() {
-        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
-        let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: false };
-        assert_eq!((&mat * &mat).ok(), Some(ans))
+        if let Ok(mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
+            let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: false };
+            assert_eq!((&mat * &mat).ok(), Some(ans))
+        }
+
     }
 
 
     #[test]
     fn test_lu_solve() {
         let mat = &mut Matrix :: random(10,10);
-        let w = lufact(mat).unwrap();
-        let mut b =  Matrix :: random(10000,1);
-        lusolve(w, &mut b);
-        assert_eq!(1,1)
+        if let Ok(w) = lufact(mat){
+            let mut b =  Matrix :: random(10000,1);
+            lusolve(w, &mut b);
+            assert_eq!(1,1)
+        }
     }
 
     #[test]
     fn test_dot(){
-        let mut a = Matrix ::new(vec![1.0,2.0],2,1).unwrap();
-        let mut b = Matrix ::new(vec![1.0,2.0],1,2).unwrap();
-        let c = dot(&mut a,&mut b);
-        assert_eq!(1,1)
-        // println!("{:?}", c.elements)
+        if let Ok(mut a) =  Matrix ::new(vec![1.0,2.0],2,1){
+            if let Ok(mut b) = Matrix ::new(vec![1.0,2.0],1,2){
+                let c = dot(&mut a,&mut b);
+                assert_eq!(1,1)
+            }
+        }
+
     }
 
     #[test]
@@ -552,7 +573,6 @@ mod tests{
     fn bench_eig(ben : &mut Bencher){
         let i = 250;
         let mut mat = Matrix ::random(i,i);
-        // let mut mat1= Matrix ::random(i,i);
         ben.iter( ||eigenvalues(&mut mat))
     }
 
@@ -571,12 +591,14 @@ mod tests{
         ben.iter( || svd(&mut mat))
     }
 
-}
+        // #[bench]
+        // fn bench_lu_solve(ben : &mut Bencher){
+        //     let mut mat = Matrix ::random(2,2);
+        //     let mut b =  Matrix :: random(2,1);
+        //     ben.iter( || lusolve(lufact(&mut mat).ok().unwrap_or_else("MatrixError::ErrorGeneral"),&mut b))
+        //
+        //
+        // }
+        //
 
-    // #[bench]
-    // fn bench_lu_solve(ben : &mut Bencher){
-    //     let mat = Matrix :: new(vec![-10.0,0.0,0.0,2.0],2,2);
-    //     let mut k = mat.to_owned();
-    //     let mut b =  Matrix :: new(vec![1.0,2.0],2,1);
-    //     ben.iter( || lusolve(lufact(&mut k),&mut b))
-    // }
+}
