@@ -296,33 +296,46 @@ mod lp {
     use operations::*;
     use matrixerror::MatrixError;
     // get the eigenvalues of a matrix.
-    pub fn eigenvalues(a : &mut Matrix<f64>) -> Matrix<f64>{
+    pub fn eigenvalues(a : &mut Matrix<f64>) -> Result<Matrix<f64>,MatrixError>{
         let n = a.row_size;
         let mut w = vec![0.0; n];
         let mut work = vec![0.0; 4 * n];
         let lwork = 4 * n as isize;
         let mut info = 0;
         dsyev(b'V', b'U', n, &mut a.elements, n, &mut w, &mut work, lwork, &mut info);
-        Matrix {
-            elements : w.to_owned(),
-            row_size : w.len(),
-            col_size : 1,
-            transpose : false,
+        match info {
+            1 => Err(MatrixError::LapackComputationError),
+            0 => Ok (Matrix {
+                elements : w.to_owned(),
+                row_size : w.len(),
+                col_size : 1,
+                transpose : false,
+            }),
+            -1 => Err(MatrixError::LapackInputError),
+            _ => Err(MatrixError::GeneralError)
         }
+
     }
 
 
 
-    pub fn lufact(a : &mut Matrix<f64>) -> (&mut Matrix<f64>, Vec<i32>) {
+    pub fn lufact(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
         let m = a.row_size;
         let n = a.col_size;
         let mut ipiv = vec![0; min(m,n)];
         let mut info = 0;
         dgetrf(m, n, &mut a.elements, m, &mut ipiv, &mut info);
-        (a, ipiv)
+        match info {
+            1 => Err(MatrixError::LapackComputationError),
+            0 => Ok((a, ipiv)),
+            -1 => Err(MatrixError::LapackInputError),
+            _ => Err(MatrixError::GeneralError)
+        }
+
+
     }
 
-    pub fn lusolve(lufact : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Matrix<f64> {
+    pub fn lusolve(lufact : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Result<Matrix<f64>,MatrixError>{
         let (a,mut ipiv) = lufact;
         let lda = a.row_size;
         let n = a.col_size;
@@ -330,15 +343,23 @@ mod lp {
         let nrhs = b.col_size;
         let mut info = 0;
         dgetrs(b'N', n, nrhs, &mut a.elements, lda, &mut ipiv, &mut b.elements, ldb , &mut info);
-        Matrix {
-            elements : b.elements.to_owned(),
-            row_size : ldb,
-            col_size : nrhs,
-            transpose : false
+
+        match info {
+            1 => Err(MatrixError::LapackComputationError),
+            0 => Ok(Matrix {
+                elements : b.elements.to_owned(),
+                row_size : ldb,
+                col_size : nrhs,
+                transpose : false
+            }),
+            -1 => Err(MatrixError::LapackInputError),
+            _ => Err(MatrixError::GeneralError)
         }
+
+
     }
 
-    pub fn qr(a : &mut Matrix<f64>) -> Matrix<f64>{
+    pub fn qr(a : &mut Matrix<f64>) ->Result<Matrix<f64>,MatrixError>{
         let m = a.row_size;
         let n = a.col_size;
         let mut tau = vec![0.0; min(m,n)];
@@ -347,26 +368,31 @@ mod lp {
         let mut info = 0;
         dgeqrf(m, n, &mut a.elements, m, &mut tau,
         &mut work, lwork, &mut info);
-        Matrix {
-            elements : a.elements.to_owned(),
-            row_size : m,
-            col_size : n,
-            transpose : false
+        match info {
+            1 => Err(MatrixError::LapackComputationError),
+            0 => Ok(Matrix {
+                elements : a.elements.to_owned(),
+                row_size : m,
+                col_size : n,
+                transpose : false
+            }),
+            -1 => Err(MatrixError::LapackInputError),
+            _ => Err(MatrixError::GeneralError)
         }
     }
 
     pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
             let mut at =  a.transpose();
             let adjoint_operator = dot(a,&mut at);
-             let mut e = eigenvalues(&mut adjoint_operator.unwrap());
-             match matrix_map(&|x : &f64| x.sqrt(), &mut e) {
+             let  e = eigenvalues(&mut adjoint_operator.unwrap());
+             match matrix_map(&|x : &f64| x.sqrt(), &mut e.unwrap()) {
                     Ok(mat) => Ok(mat),
                     Err(mat) => Err(mat),
              }
 
     }
 
-    pub fn svd(a : &mut Matrix<f64>) -> (Matrix<f64>, Matrix<f64>, Matrix<f64>) {
+    pub fn svd(a : &mut Matrix<f64>) -> Result <(Matrix<f64>, Matrix<f64>, Matrix<f64>), MatrixError> {
         let m = a.row_size;
         let n = a.col_size;
 
@@ -384,23 +410,32 @@ mod lp {
         let mut s_elem = s.unwrap().elements;
         dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s_elem, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
 
-        (
-            Matrix {
-                elements : u,
-                row_size : n,
-                col_size : ldu,
-                transpose : false,
-            },
-            Matrix :: diag_mat(s_elem)
-            ,
-            Matrix {
-                elements : vt,
-                row_size : n,
-                col_size : ldvt,
-                transpose : true,
-            }
-        )
-    }
+        match info {
+            1 => Err(MatrixError::LapackComputationError),
+            0 => Ok((
+                Matrix {
+                    elements : u,
+                    row_size : n,
+                    col_size : ldu,
+                    transpose : false,
+                },
+                Matrix :: diag_mat(s_elem)
+                ,
+                Matrix {
+                    elements : vt,
+                    row_size : n,
+                    col_size : ldvt,
+                    transpose : true,
+                }
+            )
+
+    ),
+            -1 => Err(MatrixError::LapackInputError),
+            _ => Err(MatrixError::GeneralError)
+        }
+
+
+}
 }
 
 #[cfg(test)]
@@ -440,25 +475,29 @@ mod tests{
     #[test]
     fn test_eigenvalues() {
         let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
-        let w = svd(&mut mat);
+        let w = eigenvalues(&mut mat);
+        assert_eq!(1,1);
         }
 
     #[test]
     fn test_singular_values() {
         let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
         let w = singular_values(&mut mat);
+        assert_eq!(1,1);
     }
 
     #[test]
     fn test_svd() {
         let mut mat = Matrix ::random(10,10);
-        let w = singular_values(&mut mat);
+        let w = svd(&mut mat);
+        assert_eq!(1,1);
     }
 
     #[test]
     fn test_tri() {
         let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
         let w =tril(&mut mat,0).ok();
+        assert_eq!(1,1);
     }
 
     #[test]
@@ -486,9 +525,10 @@ mod tests{
     #[test]
     fn test_lu_solve() {
         let mat = &mut Matrix :: random(10,10);
-        let w = lufact(mat);
+        let w = lufact(mat).unwrap();
         let mut b =  Matrix :: random(10000,1);
         lusolve(w, &mut b);
+        assert_eq!(1,1)
     }
 
     #[test]
@@ -496,6 +536,7 @@ mod tests{
         let mut a = Matrix ::new(vec![1.0,2.0],2,1).unwrap();
         let mut b = Matrix ::new(vec![1.0,2.0],1,2).unwrap();
         let c = dot(&mut a,&mut b);
+        assert_eq!(1,1)
         // println!("{:?}", c.elements)
     }
 

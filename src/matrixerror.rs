@@ -6,6 +6,9 @@ pub enum MatrixError{
     MismatchedDimensions,
     MalformedMatrix,
     ZeroDeterminant,
+    LapackComputationError,
+    LapackInputError,
+    GeneralError
 }
 
 impl fmt::Display for MatrixError{
@@ -15,7 +18,10 @@ impl fmt::Display for MatrixError{
         match *self{
             MatrixError::MismatchedDimensions=> write!(f, "Operation cannot be performed. Mismatched dimensions."),
             MatrixError::MalformedMatrix => write!(f, "Matrix is malformed."),
-            MatrixError::ZeroDeterminant => write!(f, "Operation cannot be performed. Matrix has zero determinant.")
+            MatrixError::ZeroDeterminant => write!(f, "Operation cannot be performed. Matrix has zero determinant."),
+            MatrixError::LapackComputationError => write!(f, "Failure in the course of computation."),
+            MatrixError::LapackInputError => write!(f, "Illegal argument detected."),
+            MatrixError::GeneralError => write!(f,"Unknown error, please submit bug.")
         }
     }
 }
@@ -27,7 +33,10 @@ impl error::Error for MatrixError{
 
             MatrixError::MismatchedDimensions => "Operation cannot be performed. Mismatched dimensions.",
             MatrixError::MalformedMatrix => "Matrix is malformed.",
-            MatrixError::ZeroDeterminant => "Operation cannot be performed. Matrix has zero determinant."
+            MatrixError::ZeroDeterminant => "Operation cannot be performed. Matrix has zero determinant.",
+            MatrixError::LapackComputationError => "Failure in the course of computation.",
+            MatrixError::LapackInputError => "Illegal argument detected.",
+            MatrixError::GeneralError => "Unknown error, please submit bug."
         }
 
     }
@@ -37,7 +46,9 @@ impl error::Error for MatrixError{
           MatrixError::MismatchedDimensions => None,
           MatrixError::MalformedMatrix => None,
           MatrixError::ZeroDeterminant => None,
-
+          MatrixError::LapackComputationError => None,
+          MatrixError::LapackInputError => None,
+          MatrixError::GeneralError => None
       }
   }
 
