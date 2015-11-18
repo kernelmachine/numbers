@@ -3,6 +3,9 @@
 #![allow(unused_must_use)]
 #![feature(custom_derive)]
 #![feature(test)]
+#![feature(plugin)]
+#![plugin(clippy)]
+
 
 extern crate blas;
 extern crate lapack;
@@ -21,7 +24,6 @@ use num::traits::{Num, Zero, One};
 use zipWith::IntoZipWith;
 
 
-
 #[derive(Debug, Clone)]
 pub struct Matrix <T : Num + Clone + Rand> {
     elements : Vec<T>,
@@ -30,20 +32,32 @@ pub struct Matrix <T : Num + Clone + Rand> {
     transpose :  bool,
 }
 
+pub enum UpperOrLower{
+    Upper,
+    Lower
+}
+
+pub enum Eig {
+    E,
+    EV,
+}
+
+pub type SVD = (Matrix<f64>, Matrix<f64>, Matrix<f64>);
 
 impl<'a, 'b, T : Num + Clone + Rand> Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Result<Matrix<T>, MatrixError>;
 
     fn add(self, other: &Matrix<T>) -> Result<Matrix<T>, MatrixError> {
-        match self.col_size == other.col_size {
-            true =>
+        if self.col_size != other.col_size{
+             return Err(MatrixError::MismatchedDimensions)
+         }
+
+
             Ok(Matrix {
             elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x+y).collect(),
             row_size : self.row_size,
             col_size : other.col_size,
-            transpose : false}),
-            false => return Err(MatrixError::MismatchedDimensions)
-        }
+            transpose : false})
 
     }
 }
@@ -52,33 +66,34 @@ impl<'a, 'b, T : Num + Clone + Rand> Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Result<Matrix<T>, MatrixError>;
 
     fn sub(self, other: &'b Matrix<T>) -> Result<Matrix<T>, MatrixError> {
-        match self.col_size == other.col_size {
-            true =>
-            Ok(Matrix {
-            elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x-y).collect(),
-            row_size : self.row_size,
-            col_size : other.col_size,
-            transpose : false}),
-            false => return Err(MatrixError::MismatchedDimensions)
-        }
+        if self.col_size != other.col_size{
+             return Err(MatrixError::MismatchedDimensions)
+         }
+        Ok(Matrix {
+        elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x-y).collect(),
+        row_size : self.row_size,
+        col_size : other.col_size,
+        transpose : false})
     }
+
 }
 
 impl<'a, 'b, T : Num + Clone + Rand> Div<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Result<Matrix<T>, MatrixError>;
 
     fn div(self, other: &'b Matrix<T>) -> Result<Matrix<T>, MatrixError> {
-        match self.col_size == other.col_size {
-            true =>
+        if self.col_size != other.col_size{
+             return Err(MatrixError::MismatchedDimensions)
+         }
             Ok(Matrix {
             elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x/y).collect(),
             row_size : self.row_size,
             col_size : other.col_size,
-            transpose : false}),
-            false => return Err(MatrixError::MismatchedDimensions)
+            transpose : false}
+        )
         }
     }
-}
+
 
 
 
@@ -86,17 +101,21 @@ impl<'a, 'b, T : Num + Clone + Rand> Mul <&'b Matrix<T>> for &'a Matrix<T> {
     type Output =Result<Matrix<T>, MatrixError>;
 
     fn mul(self, other: &'b Matrix<T>) ->Result<Matrix<T>, MatrixError>{
-        match self.col_size == other.col_size {
-            true =>
+
+
+        if self.col_size != other.col_size{
+             return Err(MatrixError::MismatchedDimensions)
+         }
+
             Ok(Matrix {
             elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x*y).collect(),
             row_size : self.row_size,
             col_size : other.col_size,
-            transpose : false}),
-            false => return Err(MatrixError::MismatchedDimensions)
+            transpose : false})
+
         }
     }
-}
+
 
 impl <T : Num + Clone + Rand> PartialEq for Matrix<T>{
     fn eq(&self, other: &Matrix<T>) -> bool {
@@ -154,7 +173,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
             let e = &a[i-1];
             mat.replace(i, i, e.to_owned());
         }
-        return mat
+        mat
     }
 
     fn identity(row_size : usize) -> Matrix<T> {
@@ -172,13 +191,13 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         if self.transpose == true{
             return (row-1)+ (col-1)*self.row_size
         }
-        return (col-1) +(row-1)*self.col_size
+        (col-1) +(row-1)*self.col_size
     }
 
     // get an element from the matrix
     fn get_element(&self, row : usize, col : usize) -> T{
         let elem = &self.elements[self.get_ind(row,col)];
-        return elem.to_owned()
+        elem.to_owned()
     }
 
 
@@ -199,7 +218,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         for elem in 1..min(self.row_size,self.col_size){
             diag.push(self.get_element(elem,elem));
         }
-        return diag
+        diag
     }
 
 
@@ -209,15 +228,13 @@ impl <T:Num + Clone + Rand> Matrix <T>{
             for j in 1..col_size+1{
                 match upper_or_lower{
                     b'U' =>{
-                        match i <= j + k{
-                            true => mat.replace(i,j,One::one()),
-                            false => continue
+                        if i <= j + k{
+                            mat.replace(i,j,One::one());
                         }
                     }
                     b'L' => {
-                        match i >= j + k{
-                            true => mat.replace(i,j,One::one()),
-                            false => continue
+                        if i >= j + k{
+                            mat.replace(i,j,One::one());
                         }
                     }
                     _ => {
@@ -248,20 +265,19 @@ mod operations{
             let m = a.row_size;
             let n = b.col_size;
 
-            match a.col_size == b.col_size {
-                true =>{
-                let k = a.col_size;
-                let mut c = vec![0.0; m*n];
-                dgemm(b'N', b'N', m, n, k, 1.0, &mut a.elements, m, &mut b.elements,k, 0.0,&mut c, m);
-                Ok(Matrix {
-                    elements : c,
-                    row_size : m,
-                    col_size : n,
-                    transpose : false,
-                })
+            if a.col_size != b.col_size {
+                return Err(MatrixError::MismatchedDimensions)
             }
-                false => return Err(MatrixError::MismatchedDimensions)
-            }
+            let k = a.col_size;
+            let mut c = vec![0.0; m*n];
+            dgemm(b'N', b'N', m, n, k, 1.0, &a.elements, m, &b.elements,k, 0.0,&mut c, m);
+            Ok(Matrix {
+                elements : c,
+                row_size : m,
+                col_size : n,
+                transpose : false,
+            })
+
 
     }
 
@@ -297,10 +313,12 @@ mod operations{
 
 mod algorithms {
     use super::Matrix;
+    use super::SVD;
     use lapack::*;
     use std::cmp::{min,max};
     use operations::*;
     use matrixerror::MatrixError;
+
     // get the eigenvalues of a matrix.
     pub fn eigenvalues(a : &mut Matrix<f64>) -> Result<Matrix<f64>,MatrixError>{
         let n = a.row_size;
@@ -318,7 +336,7 @@ mod algorithms {
                 transpose : false,
             }),
             -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::GeneralError)
+            _ => Err(MatrixError::UnknownError)
         }
 
     }
@@ -335,7 +353,7 @@ mod algorithms {
             1 => Err(MatrixError::LapackComputationError),
             0 => Ok((a, ipiv)),
             -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::GeneralError)
+            _ => Err(MatrixError::UnknownError)
         }
 
 
@@ -343,13 +361,13 @@ mod algorithms {
 
 
     pub fn lusolve(lufact : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Result<Matrix<f64>,MatrixError>{
-        let (a,mut ipiv) = lufact;
+        let (a,ipiv) = lufact;
         let lda = a.row_size;
         let n = a.col_size;
         let ldb = b.row_size;
         let nrhs = b.col_size;
         let mut info = 0;
-        dgetrs(b'N', n, nrhs, &mut a.elements, lda, &mut ipiv, &mut b.elements, ldb , &mut info);
+        dgetrs(b'N', n, nrhs, &a.elements, lda, &ipiv, &mut b.elements, ldb , &mut info);
 
         match info {
             1 => Err(MatrixError::LapackComputationError),
@@ -360,7 +378,7 @@ mod algorithms {
                 transpose : false
             }),
             -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::GeneralError)
+            _ => Err(MatrixError::UnknownError)
         }
 
 
@@ -384,7 +402,7 @@ mod algorithms {
                 transpose : false
             }),
             -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::GeneralError)
+            _ => Err(MatrixError::UnknownError)
         }
     }
 
@@ -399,7 +417,7 @@ mod algorithms {
 
     }
 
-    pub fn svd(a : &mut Matrix<f64>) -> Result <(Matrix<f64>, Matrix<f64>, Matrix<f64>), MatrixError> {
+    pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
         let m = a.row_size;
         let n = a.col_size;
 
@@ -438,7 +456,7 @@ mod algorithms {
 
     ),
             -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::GeneralError)
+            _ => Err(MatrixError::UnknownError)
         }
 
 
@@ -451,7 +469,7 @@ mod tests{
     use super::algorithms::*;
     use super::operations::*;
     use test::Bencher;
-
+    use num::traits::Float;
     #[test]
     fn test_zeros() {
         let row_size = 2;
@@ -466,9 +484,9 @@ mod tests{
         let column_size = 2;
         if let Ok(mat) = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size){
             let element = mat.get_element(1,2);
-            assert_eq!(2.0, element);
+            assert!((element - 2.0).abs() < 1e-14);
             let element = mat.transpose().get_element(1,2);
-            assert_eq!(3.0, element)
+            assert!((element - 3.0).abs() < 1e-14);
         }
     }
 
