@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
+#![allow(unused_must_use)]
 #![feature(custom_derive)]
 #![feature(test)]
 
@@ -294,7 +295,7 @@ mod operations{
 }
 
 
-mod lp {
+mod algorithms {
     use super::Matrix;
     use lapack::*;
     use std::cmp::{min,max};
@@ -447,7 +448,7 @@ mod lp {
 #[cfg(test)]
 mod tests{
     use super::Matrix;
-    use super::lp::*;
+    use super::algorithms::*;
     use super::operations::*;
     use test::Bencher;
 
