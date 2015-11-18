@@ -10,11 +10,15 @@ extern crate zipWith;
 extern crate num;
 extern crate test;
 
+pub mod matrixerror;
+
+use matrixerror::MatrixError;
 use rand::{thread_rng, Rng, Rand};
 use std::cmp::*;
 use std::ops::{Add, Sub, Mul, Div};
 use num::traits::{Num, Zero, One};
 use zipWith::IntoZipWith;
+
 
 
 #[derive(Debug, Clone)]
@@ -27,48 +31,69 @@ pub struct Matrix <T : Num + Clone + Rand> {
 
 
 impl<'a, 'b, T : Num + Clone + Rand> Add<&'b Matrix<T>> for &'a Matrix<T> {
-    type Output = Matrix<T>;
+    type Output = Result<Matrix<T>, MatrixError>;
 
-    fn add(self, other: &Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x+y).collect(),
-        row_size : self.row_size,
-        col_size : other.col_size,
-        transpose : false}
+    fn add(self, other: &Matrix<T>) -> Result<Matrix<T>, MatrixError> {
+        match self.col_size == other.col_size {
+            true =>
+            Ok(Matrix {
+            elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x+y).collect(),
+            row_size : self.row_size,
+            col_size : other.col_size,
+            transpose : false}),
+            false => return Err(MatrixError::MismatchedDimensions)
+        }
+
     }
 }
 
 impl<'a, 'b, T : Num + Clone + Rand> Sub<&'b Matrix<T>> for &'a Matrix<T> {
-    type Output = Matrix<T>;
+    type Output = Result<Matrix<T>, MatrixError>;
 
-    fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.clone().zip_with(other.clone().elements, |x,y| x-y).collect(),
-        row_size : self.row_size,
-        col_size : other.col_size,
-        transpose : false}
+    fn sub(self, other: &'b Matrix<T>) -> Result<Matrix<T>, MatrixError> {
+        match self.col_size == other.col_size {
+            true =>
+            Ok(Matrix {
+            elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x-y).collect(),
+            row_size : self.row_size,
+            col_size : other.col_size,
+            transpose : false}),
+            false => return Err(MatrixError::MismatchedDimensions)
+        }
     }
 }
 
 impl<'a, 'b, T : Num + Clone + Rand> Div<&'b Matrix<T>> for &'a Matrix<T> {
-    type Output = Matrix<T>;
+    type Output = Result<Matrix<T>, MatrixError>;
 
-    fn div(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements :  self.elements.clone().zip_with(other.clone().elements, |x,y| x/y).collect(),
-        row_size : self.row_size,
-        col_size : other.col_size,
-        transpose : false}
+    fn div(self, other: &'b Matrix<T>) -> Result<Matrix<T>, MatrixError> {
+        match self.col_size == other.col_size {
+            true =>
+            Ok(Matrix {
+            elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x/y).collect(),
+            row_size : self.row_size,
+            col_size : other.col_size,
+            transpose : false}),
+            false => return Err(MatrixError::MismatchedDimensions)
+        }
     }
 }
 
 
 
 impl<'a, 'b, T : Num + Clone + Rand> Mul <&'b Matrix<T>> for &'a Matrix<T> {
-    type Output = Matrix<T>;
+    type Output =Result<Matrix<T>, MatrixError>;
 
-    fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
-        Matrix {elements : self.elements.clone().zip_with(other.clone().elements, |x,y| x*y).collect(),
-        row_size : self.row_size,
-        col_size : other.col_size,
-        transpose : false}
+    fn mul(self, other: &'b Matrix<T>) ->Result<Matrix<T>, MatrixError>{
+        match self.col_size == other.col_size {
+            true =>
+            Ok(Matrix {
+            elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x*y).collect(),
+            row_size : self.row_size,
+            col_size : other.col_size,
+            transpose : false}),
+            false => return Err(MatrixError::MismatchedDimensions)
+        }
     }
 }
 
@@ -85,18 +110,16 @@ impl <T : Num + Clone + Rand> PartialEq for Matrix<T>{
 impl <T:Num + Clone + Rand> Matrix <T>{
 
     // create new Matrix
-    fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Matrix<T>{
-
-        if (r_size * c_size) != e.len(){
-            panic!("dimensions do not match length of vector.")
+    fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Result<Matrix<T>, MatrixError>{
+        if r_size * c_size != e.len(){
+            return Err(MatrixError :: MalformedMatrix)
         }
-
-        Matrix {
+        Ok(Matrix {
             elements : e,
             row_size : r_size,
             col_size : c_size,
             transpose : false,
-        }
+        })
     }
 
     // creates matrix of zeros
@@ -218,46 +241,52 @@ mod operations{
     use blas::*;
     use num::traits::Num;
     use rand :: Rand;
-    pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Matrix<f64>{
+    use matrixerror::MatrixError;
+
+    pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>{
             let m = a.row_size;
             let n = b.col_size;
 
-            if a.col_size != b.row_size {
-                panic!("number of columns in A does not match number of rows in B");
+            match a.col_size == b.col_size {
+                true =>{
+                let k = a.col_size;
+                let mut c = vec![0.0; m*n];
+                dgemm(b'N', b'N', m, n, k, 1.0, &mut a.elements, m, &mut b.elements,k, 0.0,&mut c, m);
+                Ok(Matrix {
+                    elements : c,
+                    row_size : m,
+                    col_size : n,
+                    transpose : false,
+                })
             }
-            let k = a.col_size;
-            let mut c = vec![0.0; m*n];
-            dgemm(b'N', b'N', m, n, k, 1.0, &mut a.elements, m, &mut b.elements,k, 0.0,&mut c, m);
-            Matrix {
-                elements : c,
-                row_size : m,
-                col_size : n,
-                transpose : false,
+                false => return Err(MatrixError::MismatchedDimensions)
             }
+
     }
 
-    pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Matrix<T>{
-           Matrix {
+
+    pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Result<Matrix<T>, MatrixError>{
+          Ok(Matrix {
                elements: a.elements.iter().map(func).collect(),
                row_size : a.row_size,
                col_size : a.col_size,
                transpose : false,
-           }
+           })
    }
 
 
-    pub fn triu<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
+    pub fn triu<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Result<Matrix<T>, MatrixError>{
         let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
         &tri_mat *&a
     }
 
-    pub fn tril<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Matrix<T>{
+    pub fn tril<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Result<Matrix<T>, MatrixError>{
         let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
         &tri_mat *&a
     }
 
 
-    }
+}
 
 
 mod lp {
@@ -265,6 +294,7 @@ mod lp {
     use lapack::*;
     use std::cmp::{min,max};
     use operations::*;
+    use matrixerror::MatrixError;
     // get the eigenvalues of a matrix.
     pub fn eigenvalues(a : &mut Matrix<f64>) -> Matrix<f64>{
         let n = a.row_size;
@@ -279,9 +309,7 @@ mod lp {
             col_size : 1,
             transpose : false,
         }
-
-
-            }
+    }
 
 
 
@@ -327,18 +355,22 @@ mod lp {
         }
     }
 
-    pub fn singular_values(a : &mut Matrix<f64>) -> Matrix<f64> {
+    pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
             let mut at =  a.transpose();
-            let mut adjoint_operator = dot(a,&mut at);
-            let mut e = eigenvalues(&mut adjoint_operator);
-            return matrix_map(&|x : &f64| x.sqrt(), &mut e);
+            let adjoint_operator = dot(a,&mut at);
+             let mut e = eigenvalues(&mut adjoint_operator.unwrap());
+             match matrix_map(&|x : &f64| x.sqrt(), &mut e) {
+                    Ok(mat) => Ok(mat),
+                    Err(mat) => Err(mat),
+             }
+
     }
 
     pub fn svd(a : &mut Matrix<f64>) -> (Matrix<f64>, Matrix<f64>, Matrix<f64>) {
         let m = a.row_size;
         let n = a.col_size;
 
-        let mut s = singular_values(a);
+        let s = singular_values(a);
         let ldu = m;
         let mut u = vec![0.0; ldu*min(m,n)];
 
@@ -349,7 +381,8 @@ mod lp {
         let mut work = vec![0.0; lwork];
 
         let mut info = 0;
-        dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s.elements, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
+        let mut s_elem = s.unwrap().elements;
+        dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s_elem, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
 
         (
             Matrix {
@@ -358,7 +391,7 @@ mod lp {
                 col_size : ldu,
                 transpose : false,
             },
-            Matrix :: diag_mat(s.elements)
+            Matrix :: diag_mat(s_elem)
             ,
             Matrix {
                 elements : vt,
@@ -388,7 +421,7 @@ mod tests{
     fn test_get_element() {
         let row_size = 2;
         let column_size = 2;
-        let mat = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size);
+        let mat = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size).unwrap();
         let element = mat.get_element(1,2);
         assert_eq!(2.0, element);
         let element = mat.transpose().get_element(1,2);
@@ -399,20 +432,20 @@ mod tests{
     fn test_transpose() {
         let row_size = 2;
         let column_size = 2;
-        let mat = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size);
+        let mat = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size).unwrap();
         let mat_t = mat.transpose().transpose();
         assert_eq!(mat_t,mat)
     }
 
     #[test]
     fn test_eigenvalues() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
         let w = svd(&mut mat);
         }
 
     #[test]
     fn test_singular_values() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
         let w = singular_values(&mut mat);
     }
 
@@ -424,29 +457,29 @@ mod tests{
 
     #[test]
     fn test_tri() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
-        let w =tril(&mut mat,0);
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
+        let w =tril(&mut mat,0).ok();
     }
 
     #[test]
     fn test_add() {
-        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
-        assert_eq!(&mat + &mat, matrix_map(&|&x| x + x, &mut mat));
+        let mut mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
+        assert_eq!((&mat + &mat).ok(), matrix_map(&|&x| x + x, &mut mat).ok());
     }
 
     #[test]
     fn test_sub() {
-        let mat = Matrix :: new(vec![3, 1, 1, 1, 3, 1, 1, 1, 3], 3, 3);
-        assert_eq!(&mat - &mat,Matrix :: zeros(3,3))
+        let mat = Matrix :: new(vec![3, 1, 1, 1, 3, 1, 1, 1, 3], 3, 3).unwrap();
+        assert_eq!((&mat - &mat).ok(),Some(Matrix :: zeros(3,3)))
     }
 
 
 
     #[test]
     fn test_mul() {
-        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3);
+        let mat = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3).unwrap();
         let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: false };
-        assert_eq!(&mat * &mat, ans)
+        assert_eq!((&mat * &mat).ok(), Some(ans))
     }
 
 
@@ -460,20 +493,19 @@ mod tests{
 
     #[test]
     fn test_dot(){
-        let mut a = Matrix ::new(vec![1.0,2.0],2,1);
-        let mut b = Matrix ::new(vec![1.0,2.0],1,2);
+        let mut a = Matrix ::new(vec![1.0,2.0],2,1).unwrap();
+        let mut b = Matrix ::new(vec![1.0,2.0],1,2).unwrap();
         let c = dot(&mut a,&mut b);
         // println!("{:?}", c.elements)
     }
 
     #[test]
     fn test_map(){
-        let mut a = Matrix ::random(10,10);
-        let v = matrix_map(&|&x| x+2.0, &mut a);
-        assert_eq!(Matrix ::new(vec![3.0,4.0],2,1), v);
+        let mut a : Matrix<f64>= Matrix ::random(10,10);
+        let v = matrix_map(&|&x| x+x, &mut a);
+        let e = matrix_map(&|&x| x*2.0, &mut a);
+        assert_eq!(e.ok(),v.ok());
     }
-
-    // }
 
     #[bench]
     fn bench_eig(ben : &mut Bencher){
@@ -482,6 +514,7 @@ mod tests{
         // let mut mat1= Matrix ::random(i,i);
         ben.iter( ||eigenvalues(&mut mat))
     }
+
     #[bench]
     fn bench_dot(ben : &mut Bencher){
         let i = 500;
@@ -489,17 +522,15 @@ mod tests{
         let mut mat1= Matrix ::random(i,i);
         ben.iter( ||dot(&mut mat, &mut mat1))
     }
+
     #[bench]
     fn bench_svd(ben : &mut Bencher){
         let i = 500;
         let mut mat = Matrix ::random(i,i);
-        ben.iter( ||svd(&mut mat))
+        ben.iter( || svd(&mut mat))
+    }
 
 }
-
-}
-
-    // }
 
     // #[bench]
     // fn bench_lu_solve(ben : &mut Bencher){
