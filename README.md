@@ -1,2 +1,2 @@
-# Numbrs
+# Numbers
 Matrix computations in Rust
