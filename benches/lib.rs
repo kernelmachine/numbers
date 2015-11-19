@@ -1,14 +1,14 @@
 #![feature(test)]
 extern crate test;
-extern crate numbrs;
+extern crate numbers;
 extern crate num;
 
 
-use numbrs::{Matrix, Eig, Triangular};
-use numbrs::scalars::*;
-use numbrs::solvers::*;
-use numbrs::operations::*;
-use numbrs::factorizations::*;
+use numbers::{Matrix, Eig, Triangular};
+use numbers::scalars::*;
+use numbers::solvers::*;
+use numbers::operations::*;
+use numbers::factorizations::*;
 use test::Bencher;
 use num::traits::Float;
 

@@ -1,5 +1,5 @@
 [root]
-name = "numbrs"
+name = "numbers"
 version = "0.1.0"
 dependencies = [
  "blas 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",

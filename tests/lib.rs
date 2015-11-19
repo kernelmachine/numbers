@@ -1,16 +1,16 @@
 #[allow(unused_variables)]
 #[allow(unused_must_use)]
 
-extern crate numbrs;
+extern crate numbers;
 extern crate num;
 
 #[cfg(test)]
 mod tests{
-    use numbrs::{Matrix, Eig, Triangular};
-    use numbrs::scalars::*;
-    use numbrs::solvers::*;
-    use numbrs::operations::*;
-    use numbrs::factorizations::*;
+    use numbers::{Matrix, Eig, Triangular};
+    use numbers::scalars::*;
+    use numbers::solvers::*;
+    use numbers::operations::*;
+    use numbers::factorizations::*;
     use num::traits::Float;
     #[test]
     fn test_zeros() {
