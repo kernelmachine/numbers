@@ -71,19 +71,17 @@
 <span id="29">29</span>
 <span id="30">30</span>
 <span id="31">31</span>
-<span id="32">32</span>
 </pre><pre class='rust '>
-<span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Matrix</span>, <span class='ident'>Eig</span>, <span class='ident'>SVD</span>, <span class='ident'>Triangular</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::{<span class='ident'>min</span>,<span class='ident'>max</span>};
+<span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Matrix</span>};
 <span class='kw'>use</span> <span class='ident'>lapack</span>::<span class='op'>*</span>;
-<span class='kw'>use</span> <span class='ident'>operations</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>factorizations</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>matrixerror</span>::<span class='ident'>MatrixError</span>;
 
 
 
 
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lusolve</span>(<span class='ident'>lufact</span> : (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span>), <span class='ident'>b</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span>  <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
-    <span class='kw'>let</span> (<span class='ident'>a</span>,<span class='ident'>ipiv</span>) <span class='op'>=</span> <span class='ident'>lufact</span>;
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lusolve</span>(<span class='ident'>lu</span> : (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span>), <span class='ident'>b</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span>  <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
+    <span class='kw'>let</span> (<span class='ident'>a</span>,<span class='ident'>ipiv</span>) <span class='op'>=</span> <span class='ident'>lu</span>;
     <span class='kw'>let</span> <span class='ident'>lda</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
     <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>col_size</span>;
     <span class='kw'>let</span> <span class='ident'>ldb</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>row_size</span>;

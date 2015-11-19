@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["lufact",""],["qr",""],["svd",""]]});
+initSidebarItems({"fn":[["lu",""],["qr",""],["svd",""]]});
