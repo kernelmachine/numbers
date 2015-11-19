@@ -27,24 +27,24 @@ cd x86_64 && make ../slaswp_minus.o
 cd x86_64 && make ../dlaswp_plus.o
 cd x86_64 && make ../dlaswp_minus.o
 make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
+make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 make[3]: `../slaswp_minus.o' is up to date.
 make[3]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 cd x86_64 && make ../claswp_plus.o
 make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
-make[3]: `../slaswp_plus.o' is up to date.
+make[3]: `../dlaswp_plus.o' is up to date.
 make[3]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 cd x86_64 && make ../claswp_minus.o
 make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 make[3]: `../dlaswp_minus.o' is up to date.
 make[3]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
-make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
-make[3]: `../dlaswp_plus.o' is up to date.
+make[3]: `../slaswp_plus.o' is up to date.
 make[3]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 cd x86_64 && make ../zlaswp_plus.o
+cd x86_64 && make ../zlaswp_minus.o
 make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 make[3]: `../claswp_plus.o' is up to date.
 make[3]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
-cd x86_64 && make ../zlaswp_minus.o
 make[3]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
 make[3]: `../claswp_minus.o' is up to date.
 make[3]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/lapack/laswp/x86_64'
@@ -119,18 +119,18 @@ gcc -O2 -DMAX_STACK_ALLOC=2048 -Wall -m64 -DF_INTERFACE_GFORT -fPIC -DSMP_SERVER
 OK.
 rm -f linktest
 make[1]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source/exports'
-Running: "make" "install" "DESTDIR=/home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out"
+Running: "make" "install" "DESTDIR=/home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out"
 make -j 4 -f Makefile.install install
 make[1]: Entering directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source'
-Generating openblas_config.h in /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
-Generating f77blas.h in /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
-Generating cblas.h in /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
-Copying LAPACKE header files to /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
-Copying the static library to /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib
-Copying the shared library to /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib
-Generating OpenBLASConfig.cmake in /home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib/cmake/openblas
+Generating openblas_config.h in /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
+Generating f77blas.h in /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
+Generating cblas.h in /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
+Copying LAPACKE header files to /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/include
+Copying the static library to /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib
+Copying the shared library to /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib
+Generating OpenBLASConfig.cmake in /home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib/cmake/openblas
 Install OK!
 make[1]: Leaving directory `/home/sgururangan/.multirust/toolchains/nightly-2015-11-08/cargo/registry/src/github.com-0a35038f75765ae4/openblas-provider-0.1.6/source'
 cargo:rustc-link-lib=dylib=gfortran
-cargo:rustc-link-search=/home/sgururangan/Github/numbrs/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib
+cargo:rustc-link-search=/home/sgururangan/Github/numbers/target/debug/build/openblas-provider-4f7d2b9e1308eace/out/opt/OpenBLAS/lib
 cargo:rustc-link-lib=dylib=openblas

@@ -1,4 +1,4 @@
-//! Numbrs provides safe, modular, and fast high-dimensional matrix computations.
+//! Numbers provides safe, modular, and fast high-dimensional matrix computations.
 
 #![allow(dead_code)]
 #![allow(unused_variables)]

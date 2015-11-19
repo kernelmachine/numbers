@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["eigenvalues",""],["singular_values",""]]});
