@@ -1,3 +1,5 @@
+//! Numbrs provides safe, modular, and fast high-dimensional matrix computations.
+
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_must_use)]
@@ -5,7 +7,7 @@
 #![feature(test)]
 #![feature(plugin)]
 #![plugin(clippy)]
-
+#![allow(match_bool)]
 
 extern crate blas;
 extern crate lapack;
@@ -15,6 +17,10 @@ extern crate num;
 extern crate test;
 
 pub mod matrixerror;
+pub mod operations;
+pub mod scalars;
+pub mod solvers;
+pub mod factorizations;
 
 use matrixerror::MatrixError;
 use rand::{thread_rng, Rng, Rand};
@@ -23,25 +29,30 @@ use std::ops::{Add, Sub, Mul, Div};
 use num::traits::{Num, Zero, One};
 use zipWith::IntoZipWith;
 
-
+/// Generic Matrix object.
 #[derive(Debug, Clone)]
 pub struct Matrix <T : Num + Clone + Rand> {
-    elements : Vec<T>,
-    row_size : usize,
-    col_size : usize,
-    transpose :  bool,
+    pub elements : Vec<T>,
+    pub row_size : usize,
+    pub col_size : usize,
+    pub transpose :  bool,
 }
 
-pub enum UpperOrLower{
+/// Triangular represents two variants of triangular matrices : Upper and Lower. Use this enum
+/// for functions that require specification of triangular matrix output.
+pub enum Triangular{
     Upper,
     Lower
 }
 
+/// For relevant functions, Eig represents the option to output either just eigenvalues or
+/// both eigenvalues and eigenvectors.
 pub enum Eig {
-    E,
-    EV,
+    Eigenvalues,
+    EigenvaluesAndEigenvectors,
 }
 
+/// Type declaration of Singular Value Decomposition Output
 pub type SVD = (Matrix<f64>, Matrix<f64>, Matrix<f64>);
 
 impl<'a, 'b, T : Num + Clone + Rand> Add<&'b Matrix<T>> for &'a Matrix<T> {
@@ -130,7 +141,7 @@ impl <T : Num + Clone + Rand> PartialEq for Matrix<T>{
 impl <T:Num + Clone + Rand> Matrix <T>{
 
     // create new Matrix
-    fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Result<Matrix<T>, MatrixError>{
+    pub fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Result<Matrix<T>, MatrixError>{
         if r_size * c_size != e.len(){
             return Err(MatrixError :: MalformedMatrix)
         }
@@ -143,7 +154,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     }
 
     // creates matrix of zeros
-    fn zeros (r_size : usize, c_size : usize) -> Matrix<T>{
+    pub fn zeros (r_size : usize, c_size : usize) -> Matrix<T>{
         Matrix {
             elements : vec![Zero::zero();r_size*c_size],
             row_size : r_size,
@@ -153,7 +164,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     }
 
     // creates matrix of random elements
-    fn random(r_size : usize, c_size : usize) -> Matrix<T>{
+    pub fn random(r_size : usize, c_size : usize) -> Matrix<T>{
         let e = rand::thread_rng()
         .gen_iter::<T>()
         .take(r_size*c_size)
@@ -167,7 +178,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         }
     }
 
-    fn diag_mat (a : Vec<T>) -> Matrix<T> {
+    pub fn diag_mat (a : Vec<T>) -> Matrix<T> {
         let mut mat = Matrix :: zeros(a.len(),a.len());
         for i in 1..a.len()+1{
             let e = &a[i-1];
@@ -176,18 +187,18 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         mat
     }
 
-    fn identity(row_size : usize) -> Matrix<T> {
+    pub fn identity(row_size : usize) -> Matrix<T> {
           Matrix :: diag_mat(vec![One::one(); row_size])
     }
 
 
-    fn replace(&mut self,row: usize, col:usize, value : T) -> () {
+    pub fn replace(&mut self,row: usize, col:usize, value : T) -> () {
         let ind = self.get_ind(row,col);
         self.elements[ind] = value;
     }
 
     // map index in matrix to index in 1-d vector
-    fn get_ind(&self, row :usize, col : usize) -> usize{
+    pub fn get_ind(&self, row :usize, col : usize) -> usize{
         if self.transpose == true{
             return (row-1)+ (col-1)*self.row_size
         }
@@ -195,7 +206,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     }
 
     // get an element from the matrix
-    fn get_element(&self, row : usize, col : usize) -> T{
+    pub fn get_element(&self, row : usize, col : usize) -> T{
         let elem = &self.elements[self.get_ind(row,col)];
         elem.to_owned()
     }
@@ -203,7 +214,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
 
     // transpose matrix. We're not actually changing anything in memory.
     // we just flag the matrix as transpose to change pointer reference to elements.
-    fn transpose(&self) -> Matrix<T> {
+    pub fn transpose(&self) -> Matrix<T> {
         Matrix {
             elements : self.elements.clone(),
             row_size : self.col_size,
@@ -213,7 +224,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     }
 
     // get the diagonal of a matrix.
-    fn diagonal (&self) -> Vec<T>{
+    pub fn diagonal (&self) -> Vec<T>{
         let mut diag : Vec<T> = Vec :: new();
         for elem in 1..min(self.row_size,self.col_size){
             diag.push(self.get_element(elem,elem));
@@ -222,24 +233,23 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     }
 
 
-    fn tri (row_size:usize, col_size : usize, k : usize, upper_or_lower : u8) -> Matrix<T>{
+    pub fn tri (row_size:usize, col_size : usize, k : usize, upper_or_lower : Triangular) -> Matrix<T>{
         let mut mat : Matrix<T> = Matrix :: zeros(row_size, col_size);
         for i in 1..row_size+1{
             for j in 1..col_size+1{
                 match upper_or_lower{
-                    b'U' =>{
+
+                    Triangular::Upper =>{
                         if i <= j + k{
                             mat.replace(i,j,One::one());
                         }
                     }
-                    b'L' => {
+                    Triangular::Lower => {
                         if i >= j + k{
                             mat.replace(i,j,One::one());
                         }
                     }
-                    _ => {
-                        panic!("upper_or_lower parameter must be U or L");
-                    }
+
                 }
             }
         }
@@ -249,375 +259,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
 
 
     // get a submatrix from a matrix.
-    fn submatrix(&self, start : (usize,usize), dim : (usize,usize)) -> Matrix<T> {
+    pub fn submatrix(&self, start : (usize,usize), dim : (usize,usize)) -> Matrix<T> {
     unimplemented!();
     }
-}
-
-mod operations{
-    use super::Matrix;
-    use blas::*;
-    use num::traits::Num;
-    use rand :: Rand;
-    use matrixerror::MatrixError;
-
-    pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>{
-            let m = a.row_size;
-            let n = b.col_size;
-
-            if a.col_size != b.col_size {
-                return Err(MatrixError::MismatchedDimensions)
-            }
-            let k = a.col_size;
-            let mut c = vec![0.0; m*n];
-            dgemm(b'N', b'N', m, n, k, 1.0, &a.elements, m, &b.elements,k, 0.0,&mut c, m);
-            Ok(Matrix {
-                elements : c,
-                row_size : m,
-                col_size : n,
-                transpose : false,
-            })
-
-
-    }
-
-
-    pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Result<Matrix<T>, MatrixError>{
-          Ok(Matrix {
-               elements: a.elements.iter().map(func).collect(),
-               row_size : a.row_size,
-               col_size : a.col_size,
-               transpose : false,
-           })
-   }
-
-
-    pub fn triu<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Result<Matrix<T>, MatrixError>{
-        let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'U');
-        &tri_mat *&a
-    }
-
-    pub fn tril<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Result<Matrix<T>, MatrixError>{
-        let tri_mat = Matrix :: tri(a.row_size, a.col_size, k, b'L');
-        &tri_mat *&a
-    }
-
-    pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
-        unimplemented!()
-
-    }
-
-
-}
-
-
-mod algorithms {
-    use super::Matrix;
-    use super::SVD;
-    use lapack::*;
-    use std::cmp::{min,max};
-    use operations::*;
-    use matrixerror::MatrixError;
-
-    // get the eigenvalues of a matrix.
-    pub fn eigenvalues(a : &mut Matrix<f64>) -> Result<Matrix<f64>,MatrixError>{
-        let n = a.row_size;
-        let mut w = vec![0.0; n];
-        let mut work = vec![0.0; 4 * n];
-        let lwork = 4 * n as isize;
-        let mut info = 0;
-        dsyev(b'V', b'U', n, &mut a.elements, n, &mut w, &mut work, lwork, &mut info);
-        match info {
-            1 => Err(MatrixError::LapackComputationError),
-            0 => Ok (Matrix {
-                elements : w.to_owned(),
-                row_size : w.len(),
-                col_size : 1,
-                transpose : false,
-            }),
-            -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::UnknownError)
-        }
-
-    }
-
-
-
-    pub fn lufact(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
-        let m = a.row_size;
-        let n = a.col_size;
-        let mut ipiv = vec![0; min(m,n)];
-        let mut info = 0;
-        dgetrf(m, n, &mut a.elements, m, &mut ipiv, &mut info);
-        match info {
-            1 => Err(MatrixError::LapackComputationError),
-            0 => Ok((a, ipiv)),
-            -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::UnknownError)
-        }
-
-
-    }
-
-
-    pub fn lusolve(lufact : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Result<Matrix<f64>,MatrixError>{
-        let (a,ipiv) = lufact;
-        let lda = a.row_size;
-        let n = a.col_size;
-        let ldb = b.row_size;
-        let nrhs = b.col_size;
-        let mut info = 0;
-        dgetrs(b'N', n, nrhs, &a.elements, lda, &ipiv, &mut b.elements, ldb , &mut info);
-
-        match info {
-            1 => Err(MatrixError::LapackComputationError),
-            0 => Ok(Matrix {
-                elements : b.elements.to_owned(),
-                row_size : ldb,
-                col_size : nrhs,
-                transpose : false
-            }),
-            -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::UnknownError)
-        }
-
-
-    }
-
-    pub fn qr(a : &mut Matrix<f64>) ->Result<Matrix<f64>,MatrixError>{
-        let m = a.row_size;
-        let n = a.col_size;
-        let mut tau = vec![0.0; min(m,n)];
-        let mut work = vec![0.0; 4*n];
-        let lwork = 4*n as isize;
-        let mut info = 0;
-        dgeqrf(m, n, &mut a.elements, m, &mut tau,
-        &mut work, lwork, &mut info);
-        match info {
-            1 => Err(MatrixError::LapackComputationError),
-            0 => Ok(Matrix {
-                elements : a.elements.to_owned(),
-                row_size : m,
-                col_size : n,
-                transpose : false
-            }),
-            -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::UnknownError)
-        }
-    }
-
-    pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
-            let mut at =  a.transpose();
-            let adjoint_operator = dot(a,&mut at);
-             let  e = eigenvalues(&mut adjoint_operator.unwrap());
-             match matrix_map(&|x : &f64| x.sqrt(), &mut e.unwrap()) {
-                    Ok(mat) => Ok(mat),
-                    Err(mat) => Err(mat),
-             }
-
-    }
-
-    pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
-        let m = a.row_size;
-        let n = a.col_size;
-
-        let s = singular_values(a);
-        let ldu = m;
-        let mut u = vec![0.0; ldu*min(m,n)];
-
-        let ldvt = n;
-        let mut vt = vec![0.0;ldvt*n];
-
-        let lwork = max(max(1,3*min(m,n)+min(m,n)),5*min(m,n)) +1 ;
-        let mut work = vec![0.0; lwork];
-
-        let mut info = 0;
-        let mut s_elem = s.unwrap().elements;
-        dgesvd(b'A', b'A',m,n,&mut a.elements,m,&mut s_elem, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
-
-        match info {
-            1 => Err(MatrixError::LapackComputationError),
-            0 => Ok((
-                Matrix {
-                    elements : u,
-                    row_size : n,
-                    col_size : ldu,
-                    transpose : false,
-                },
-                Matrix :: diag_mat(s_elem)
-                ,
-                Matrix {
-                    elements : vt,
-                    row_size : n,
-                    col_size : ldvt,
-                    transpose : true,
-                }
-            )
-
-    ),
-            -1 => Err(MatrixError::LapackInputError),
-            _ => Err(MatrixError::UnknownError)
-        }
-
-
-}
-}
-
-#[cfg(test)]
-mod tests{
-    use super::Matrix;
-    use super::algorithms::*;
-    use super::operations::*;
-    use test::Bencher;
-    use num::traits::Float;
-    #[test]
-    fn test_zeros() {
-        let row_size = 2;
-        let column_size = 2;
-        let mat : Matrix <f64> = Matrix::zeros(row_size,column_size);
-        assert_eq!(mat.elements, [0.0,0.0,0.0,0.0])
-    }
-
-    #[test]
-    fn test_get_element() {
-        let row_size = 2;
-        let column_size = 2;
-        if let Ok(mat) = Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size){
-            let element = mat.get_element(1,2);
-            assert!((element - 2.0).abs() < 1e-14);
-            let element = mat.transpose().get_element(1,2);
-            assert!((element - 3.0).abs() < 1e-14);
-        }
-    }
-
-    #[test]
-    fn test_transpose() {
-        let row_size = 2;
-        let column_size = 2;
-        if let Ok(mat) =  Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size) {
-            let mat_t = mat.transpose().transpose();
-            assert_eq!(mat_t,mat)
-        }
-
-    }
-
-    #[test]
-    fn test_eigenvalues() {
-        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let w = eigenvalues(&mut mat);
-            assert_eq!(1,1);
-        }
-
-        }
-
-    #[test]
-    fn test_singular_values() {
-        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let w = singular_values(&mut mat);
-            assert_eq!(1,1);
-        }
-    }
-
-    #[test]
-    fn test_svd() {
-        let mut mat = Matrix ::random(10,10);
-        let w = svd(&mut mat);
-        assert_eq!(1,1);
-    }
-
-    #[test]
-    fn test_tri() {
-        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let w =tril(&mut mat,0).ok();
-            assert_eq!(1,1);
-        }
-    }
-
-    #[test]
-    fn test_add() {
-        if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            assert_eq!((&mat + &mat).ok(), matrix_map(&|&x| x + x, &mut mat).ok());
-        }
-    }
-
-    #[test]
-    fn test_sub() {
-        if let Ok(mat) =  Matrix :: new(vec![3, 1, 1, 1, 3, 1, 1, 1, 3], 3, 3){
-            assert_eq!((&mat - &mat).ok(),Some(Matrix :: zeros(3,3)))
-        }
-    }
-
-
-
-    #[test]
-    fn test_mul() {
-        if let Ok(mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: false };
-            assert_eq!((&mat * &mat).ok(), Some(ans))
-        }
-
-    }
-
-
-    #[test]
-    fn test_lu_solve() {
-        let mat = &mut Matrix :: random(10,10);
-        if let Ok(w) = lufact(mat){
-            let mut b =  Matrix :: random(10000,1);
-            lusolve(w, &mut b);
-            assert_eq!(1,1)
-        }
-    }
-
-    #[test]
-    fn test_dot(){
-        if let Ok(mut a) =  Matrix ::new(vec![1.0,2.0],2,1){
-            if let Ok(mut b) = Matrix ::new(vec![1.0,2.0],1,2){
-                let c = dot(&mut a,&mut b);
-                assert_eq!(1,1)
-            }
-        }
-
-    }
-
-    #[test]
-    fn test_map(){
-        let mut a : Matrix<f64>= Matrix ::random(10,10);
-        let v = matrix_map(&|&x| x+x, &mut a);
-        let e = matrix_map(&|&x| x*2.0, &mut a);
-        assert_eq!(e.ok(),v.ok());
-    }
-
-    #[bench]
-    fn bench_eig(ben : &mut Bencher){
-        let i = 250;
-        let mut mat = Matrix ::random(i,i);
-        ben.iter( ||eigenvalues(&mut mat))
-    }
-
-    #[bench]
-    fn bench_dot(ben : &mut Bencher){
-        let i = 500;
-        let mut mat = Matrix ::random(i,i);
-        let mut mat1= Matrix ::random(i,i);
-        ben.iter( ||dot(&mut mat, &mut mat1))
-    }
-
-    #[bench]
-    fn bench_svd(ben : &mut Bencher){
-        let i = 500;
-        let mut mat = Matrix ::random(i,i);
-        ben.iter( || svd(&mut mat))
-    }
-
-        // #[bench]
-        // fn bench_lu_solve(ben : &mut Bencher){
-        //     let mut mat = Matrix ::random(2,2);
-        //     let mut b =  Matrix :: random(2,1);
-        //     ben.iter( || lusolve(lufact(&mut mat).ok().unwrap_or_else("MatrixError::ErrorGeneral"),&mut b))
-        //
-        //
-        // }
-        //
-
 }

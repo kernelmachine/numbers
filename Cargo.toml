@@ -1,7 +1,7 @@
 [package]
-name = "matrix"
+name = "numbrs"
 version = "0.1.0"
-authors = ["suchin"]
+authors = ["Suchin Gururangan"]
 
 [dependencies]
 blas="*"

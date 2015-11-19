@@ -1,6 +1,7 @@
 use std::error;
 use std::fmt;
 
+
 #[derive(Debug)]
 pub enum MatrixError{
     MismatchedDimensions,

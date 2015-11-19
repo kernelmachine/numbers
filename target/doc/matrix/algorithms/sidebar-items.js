@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["eigenvalues",""],["lufact",""],["lusolve",""],["qr",""],["singular_values",""],["svd",""]]});
