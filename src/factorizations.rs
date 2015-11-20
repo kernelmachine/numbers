@@ -4,6 +4,24 @@ use lapack::*;
 use matrixerror::MatrixError;
 use scalars::*;
 
+
+/// LU Decomposition.
+    ///
+    ///
+    /// # Inputs
+    ///
+    /// * `a` - A rectangular matrix
+    ///
+    ///
+    /// # Outputs
+    ///
+    /// # Example
+    /// ```
+    /// let mut a : Matrix<f64>= Matrix :: random(10,10);
+    /// let v = matrix_map(&|&x| x+x, &mut a);
+    /// let e = matrix_map(&|&x| x*2.0, &mut a);
+    /// assert_eq!(e.ok(),v.ok());
+    /// ```
 pub fn lu(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
     let m = a.row_size;
     let n = a.col_size;

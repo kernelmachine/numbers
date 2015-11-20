@@ -6,7 +6,7 @@ use std::fmt;
 pub enum MatrixError{
     MismatchedDimensions,
     MalformedMatrix,
-    ZeroDeterminant,
+    SingularMatrix,
     LapackComputationError,
     LapackInputError,
     UnknownError
@@ -19,7 +19,7 @@ impl fmt::Display for MatrixError{
         match *self{
             MatrixError::MismatchedDimensions=> write!(f, "Operation cannot be performed. Mismatched dimensions."),
             MatrixError::MalformedMatrix => write!(f, "Matrix is malformed."),
-            MatrixError::ZeroDeterminant => write!(f, "Operation cannot be performed. Matrix has zero determinant."),
+            MatrixError::SingularMatrix => write!(f, "Operation cannot be performed. Matrix has zero determinant."),
             MatrixError::LapackComputationError => write!(f, "Failure in the course of computation."),
             MatrixError::LapackInputError => write!(f, "Illegal argument detected."),
             MatrixError::UnknownError => write!(f,"Unknown error, please submit bug.")
@@ -34,7 +34,7 @@ impl error::Error for MatrixError{
 
             MatrixError::MismatchedDimensions => "Operation cannot be performed. Mismatched dimensions.",
             MatrixError::MalformedMatrix => "Matrix is malformed.",
-            MatrixError::ZeroDeterminant => "Operation cannot be performed. Matrix has zero determinant.",
+            MatrixError::SingularMatrix => "Operation cannot be performed. Matrix has zero determinant.",
             MatrixError::LapackComputationError => "Failure in the course of computation.",
             MatrixError::LapackInputError => "Illegal argument detected.",
             MatrixError::UnknownError => "Unknown error, please submit bug."
@@ -46,7 +46,7 @@ impl error::Error for MatrixError{
       match *self {
           MatrixError::MismatchedDimensions => None,
           MatrixError::MalformedMatrix => None,
-          MatrixError::ZeroDeterminant => None,
+          MatrixError::SingularMatrix => None,
           MatrixError::LapackComputationError => None,
           MatrixError::LapackInputError => None,
           MatrixError::UnknownError => None

@@ -61,6 +61,12 @@ pub fn tril<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Result<Matr
 }
 
 pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
+    unimplemented!() // via LU factorization
+
+}
+
+pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
+    // take inverse of singualr vectors in SVD factorization
     unimplemented!()
 
 }

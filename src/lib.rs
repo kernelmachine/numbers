@@ -21,6 +21,7 @@ pub mod operations;
 pub mod scalars;
 pub mod solvers;
 pub mod factorizations;
+pub mod rank;
 
 use matrixerror::MatrixError;
 use rand::{thread_rng, Rng, Rand};
@@ -40,16 +41,33 @@ pub struct Matrix <T : Num + Clone + Rand> {
 
 /// Triangular represents two variants of triangular matrices : Upper and Lower. Use this enum
 /// for functions that require specification of triangular matrix output.
+#[derive(Debug, Clone)]
 pub enum Triangular{
     Upper,
     Lower
 }
 
+#[derive(Debug, Clone)]
+pub enum Norm{
+    OneNorm,
+    InfinityNorm,
+    FrobeniusNorm,
+    MaxAbsValue
+}
 /// For relevant functions, Eig represents the option to output either just eigenvalues or
 /// both eigenvalues and eigenvectors.
+#[derive(Debug, Clone)]
 pub enum Eig {
     Eigenvalues,
     EigenvaluesAndEigenvectors,
+}
+
+#[derive(Debug, Clone)]
+pub enum Condition {
+    WellConditioned,
+    IllConditioned,
+    Singular,
+    NA
 }
 
 /// Type declaration of Singular Value Decomposition Output
@@ -262,4 +280,5 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     pub fn submatrix(&self, start : (usize,usize), dim : (usize,usize)) -> Matrix<T> {
     unimplemented!();
     }
+
 }

@@ -6,12 +6,14 @@ extern crate num;
 
 #[cfg(test)]
 mod tests{
-    use numbers::{Matrix, Eig, Triangular};
+    use numbers::{Matrix, Eig, Triangular, Norm};
     use numbers::scalars::*;
     use numbers::solvers::*;
     use numbers::operations::*;
     use numbers::factorizations::*;
+    use numbers::rank::*;
     use num::traits::Float;
+    use numbers::matrixerror::*;
     #[test]
     fn test_zeros() {
         let row_size = 2;
@@ -112,6 +114,23 @@ mod tests{
     }
 
     #[test]
+    fn test_lu(){
+        let mut b = match  Matrix ::new(vec![4.0,3.0,8.0,6.01],2,2){
+            Ok(w) => Ok(w),
+            Err(w) => Err(MatrixError::MalformedMatrix)
+        };
+        let mut c = b.ok().unwrap();
+
+        let mut l = match lu(&mut c){
+            Ok(w) => Ok(w),
+            Err(w) => Err(MatrixError::LapackComputationError)
+
+        };
+
+        println!("{:?}",l);
+        assert_eq!(1,1)
+    }
+    #[test]
     fn test_dot(){
         if let Ok(mut a) =  Matrix ::new(vec![1.0,2.0],2,1){
             if let Ok(mut b) = Matrix ::new(vec![1.0,2.0],1,2){
@@ -131,4 +150,15 @@ mod tests{
     }
 
 
+    #[test]
+    fn test_rcond(){
+        let mut b =  Matrix ::new(vec![4.0,3.0,8.0,6.00000001],2,2);
+        let mut c = b.ok().unwrap();
+        let mut w =lu(&mut c);
+
+        let rc =  rcond(w.ok().unwrap(), Norm::InfinityNorm);
+        println!("{:?}",rc);
+
+        assert_eq!(1,1)
+    }
 }
