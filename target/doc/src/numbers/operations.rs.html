@@ -106,22 +106,45 @@
 <span id="64">64</span>
 <span id="65">65</span>
 <span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Matrix</span>,<span class='ident'>Triangular</span>};
 <span class='kw'>use</span> <span class='ident'>blas</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>lapack</span>::<span class='ident'>dgetri</span>;
 <span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>traits</span>::<span class='ident'>Num</span>;
 <span class='kw'>use</span> <span class='ident'>rand</span> :: <span class='ident'>Rand</span>;
 <span class='kw'>use</span> <span class='ident'>matrixerror</span>::<span class='ident'>MatrixError</span>;
-
+<span class='kw'>use</span> <span class='ident'>factorizations</span>::<span class='op'>*</span>;
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>dot</span> (<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>b</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
-        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
-        <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>col_size</span>;
-
-        <span class='kw'>if</span> <span class='ident'>a</span>.<span class='ident'>col_size</span> <span class='op'>!=</span> <span class='ident'>b</span>.<span class='ident'>col_size</span> {
+        <span class='kw'>if</span> <span class='ident'>a</span>.<span class='ident'>col_size</span> <span class='op'>!=</span> <span class='ident'>b</span>.<span class='ident'>row_size</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>MismatchedDimensions</span>)
         }
+
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
+        <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>col_size</span>;
         <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>col_size</span>;
+
+
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0.0</span>; <span class='ident'>m</span><span class='op'>*</span><span class='ident'>n</span>];
         <span class='ident'>dgemm</span>(<span class='string'>b&#39;N&#39;</span>, <span class='string'>b&#39;N&#39;</span>, <span class='ident'>m</span>, <span class='ident'>n</span>, <span class='ident'>k</span>, <span class='number'>1.0</span>, <span class='kw-2'>&amp;</span><span class='ident'>a</span>.<span class='ident'>elements</span>, <span class='ident'>m</span>, <span class='kw-2'>&amp;</span><span class='ident'>b</span>.<span class='ident'>elements</span>,<span class='ident'>k</span>, <span class='number'>0.0</span>,<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>c</span>, <span class='ident'>m</span>);
         <span class='prelude-val'>Ok</span>(<span class='ident'>Matrix</span> {
@@ -134,21 +157,7 @@
 
 }
 
-<span class='doccomment'>/// Maps a function closure onto a matrix.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Arguments</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// * `func` - A function closure, e.g. &amp;|&amp;x| 2 * x</span>
-    <span class='doccomment'>/// * `a` - A matrix</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Example</span>
-    <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>/// let mut a : Matrix&lt;f64&gt;= Matrix :: random(10,10);</span>
-    <span class='doccomment'>/// let v = matrix_map(&amp;|&amp;x| x+x, &amp;mut a);</span>
-    <span class='doccomment'>/// let e = matrix_map(&amp;|&amp;x| x*2.0, &amp;mut a);</span>
-    <span class='doccomment'>/// assert_eq!(e.ok(),v.ok());</span>
-    <span class='doccomment'>/// ```</span>
+
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>matrix_map</span> <span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Num</span> <span class='op'>+</span> <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Rand</span><span class='op'>&gt;</span> (<span class='ident'>func</span> : <span class='kw-2'>&amp;</span><span class='ident'>Fn</span>(<span class='kw-2'>&amp;</span><span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>, <span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
       <span class='prelude-val'>Ok</span>(<span class='ident'>Matrix</span> {
            <span class='ident'>elements</span>: <span class='ident'>a</span>.<span class='ident'>elements</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='ident'>func</span>).<span class='ident'>collect</span>(),
@@ -170,7 +179,38 @@
 }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>inverse</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> ) <span class='op'>-&gt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span> {
-    <span class='macro'>unimplemented</span><span class='macro'>!</span>()
+
+    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>((<span class='ident'>l</span>, <span class='ident'>ipiv</span>)) <span class='op'>=</span> <span class='ident'>lu</span> (<span class='ident'>a</span>){
+        <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>l</span>.<span class='ident'>col_size</span>;
+        <span class='kw'>let</span> <span class='ident'>lda</span> <span class='op'>=</span> <span class='ident'>l</span>.<span class='ident'>row_size</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>work</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0.0</span>; <span class='number'>4</span> <span class='op'>*</span> <span class='ident'>n</span>];
+        <span class='kw'>let</span> <span class='ident'>iwork</span> <span class='op'>=</span> <span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>*</span> <span class='number'>4</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>info</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='ident'>dgetri</span>(<span class='ident'>n</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>l</span>.<span class='ident'>elements</span>, <span class='ident'>lda</span>, <span class='kw-2'>&amp;</span><span class='ident'>ipiv</span>,<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>work</span>, <span class='ident'>iwork</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>info</span>);
+        <span class='kw'>match</span> <span class='ident'>info</span> {
+            <span class='number'>1</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>LapackComputationError</span>),
+            <span class='number'>0</span> <span class='op'>=&gt;</span> { <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='prelude-val'>Ok</span>(<span class='ident'>l</span>.<span class='ident'>to_owned</span>()); <span class='kw'>return</span> <span class='ident'>m</span>}
+            <span class='op'>-</span><span class='number'>1</span> <span class='op'>=&gt;</span> <span class='kw'>return</span>  <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>LapackInputError</span>),
+            _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>UnknownError</span>),
+        };
+
+    }
+    <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>SingularMatrix</span>)
+}
+
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pseudoinverse</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> ) <span class='op'>-&gt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span> {
+
+    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>((<span class='kw-2'>mut</span> <span class='ident'>u</span>,<span class='kw-2'>mut</span> <span class='ident'>e</span>, <span class='kw-2'>mut</span> <span class='ident'>vt</span>)) <span class='op'>=</span> <span class='ident'>svd</span>(<span class='ident'>a</span>) {
+        
+        <span class='kw'>let</span> <span class='ident'>inv_e</span> <span class='op'>=</span> <span class='ident'>matrix_map</span>(<span class='kw-2'>&amp;</span><span class='op'>|</span><span class='ident'>x</span> : <span class='kw-2'>&amp;</span><span class='ident'>f64</span><span class='op'>|</span> <span class='kw'>if</span> <span class='ident'>x</span> <span class='op'>&gt;</span> <span class='kw-2'>&amp;</span><span class='number'>0.0</span> { <span class='ident'>x</span>.<span class='ident'>recip</span>()} <span class='kw'>else</span> { <span class='number'>0.0</span> },<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>e</span>);
+        <span class='kw'>let</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>dot</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>u</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>inv_e</span>.<span class='ident'>ok</span>().<span class='ident'>unwrap</span>().<span class='ident'>transpose</span>());
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>dot</span> (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>d</span>.<span class='ident'>ok</span>().<span class='ident'>unwrap</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>vt</span>);
+        <span class='kw'>return</span> <span class='ident'>m</span>
+
+
+    }
+    <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>LapackComputationError</span>)
+    <span class='comment'>// take inverse of singualr vectors in SVD factorization</span>
 
 }
 </pre>

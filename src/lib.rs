@@ -62,7 +62,7 @@ pub enum Eig {
     EigenvaluesAndEigenvectors,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Condition {
     WellConditioned,
     IllConditioned,

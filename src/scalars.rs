@@ -5,10 +5,9 @@ use matrixerror::MatrixError;
 
 
 
-
 // get the eigenvalues of a matrix.
 pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result<Matrix<f64>,MatrixError>{
-    let n = a.row_size;
+    let n = a.col_size;
     let mut w = vec![0.0; n];
     let mut work = vec![0.0; 4 * n];
     let lwork = 4 * n as isize;
@@ -21,6 +20,7 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
         Triangular::Upper => b'U',
         Triangular::Lower => b'L'
     };
+
     dsyev(e, t, n, &mut a.elements, n, &mut w, &mut work, lwork, &mut info);
     match info {
         1 => Err(MatrixError::LapackComputationError),
@@ -38,13 +38,9 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
 
 
 
-
-
-
-
 pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
         let mut at =  a.transpose();
-        let adjoint_operator = dot(a,&mut at);
+        let adjoint_operator = dot(&mut at,a);
         let e = eigenvalues(&mut adjoint_operator.unwrap(), Eig :: Eigenvalues, Triangular::Upper);
          match matrix_map(&|x : &f64| x.sqrt(), &mut e.unwrap()) {
                 Ok(mat) => Ok(mat),

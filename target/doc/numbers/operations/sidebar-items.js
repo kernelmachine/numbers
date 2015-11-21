@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["dot",""],["inverse",""],["matrix_map","Maps a function closure onto a matrix."],["tril",""],["triu",""]]});
+initSidebarItems({"fn":[["dot",""],["inverse",""],["matrix_map",""],["pseudoinverse",""],["tril",""],["triu",""]]});

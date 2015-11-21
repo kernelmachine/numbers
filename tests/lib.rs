@@ -1,12 +1,12 @@
-#[allow(unused_variables)]
-#[allow(unused_must_use)]
+
+#[allow(dead_code)]
 
 extern crate numbers;
 extern crate num;
 
 #[cfg(test)]
 mod tests{
-    use numbers::{Matrix, Eig, Triangular, Norm};
+    use numbers::{Matrix, Eig, Triangular, Norm, Condition};
     use numbers::scalars::*;
     use numbers::solvers::*;
     use numbers::operations::*;
@@ -48,7 +48,7 @@ mod tests{
     #[test]
     fn test_eigenvalues() {
         if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let w = eigenvalues(&mut mat, Eig :: Eigenvalues, Triangular :: Upper);
+            let _w = eigenvalues(&mut mat, Eig :: Eigenvalues, Triangular :: Upper);
             assert_eq!(1,1);
         }
 
@@ -57,7 +57,7 @@ mod tests{
     #[test]
     fn test_singular_values() {
         if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let w = singular_values(&mut mat);
+            let _w = singular_values(&mut mat);
             assert_eq!(1,1);
         }
     }
@@ -65,14 +65,14 @@ mod tests{
     #[test]
     fn test_svd() {
         let mut mat = Matrix ::random(10,10);
-        let w = svd(&mut mat);
+        let _w = svd(&mut mat);
         assert_eq!(1,1);
     }
 
     #[test]
     fn test_tri() {
         if let Ok(mut mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let w =tril(&mut mat,0).ok();
+            let _w =tril(&mut mat,0).ok();
             assert_eq!(1,1);
         }
     }
@@ -108,33 +108,32 @@ mod tests{
         let mat = &mut Matrix :: random(10,10);
         if let Ok(w) = lu(mat){
             let mut b =  Matrix :: random(10000,1);
-            lusolve(w, &mut b);
+            let _l = lusolve(w, &mut b);
             assert_eq!(1,1)
         }
     }
 
     #[test]
     fn test_lu(){
-        let mut b = match  Matrix ::new(vec![4.0,3.0,8.0,6.01],2,2){
+        let  b = match  Matrix ::new(vec![4.0,3.0,8.0,6.01],2,2){
             Ok(w) => Ok(w),
-            Err(w) => Err(MatrixError::MalformedMatrix)
+            Err(_w) => Err(MatrixError::MalformedMatrix)
         };
         let mut c = b.ok().unwrap();
 
-        let mut l = match lu(&mut c){
+        let mut _l = match lu(&mut c){
             Ok(w) => Ok(w),
-            Err(w) => Err(MatrixError::LapackComputationError)
+            Err(_w) => Err(MatrixError::LapackComputationError)
 
         };
 
-        println!("{:?}",l);
         assert_eq!(1,1)
     }
     #[test]
     fn test_dot(){
         if let Ok(mut a) =  Matrix ::new(vec![1.0,2.0],2,1){
             if let Ok(mut b) = Matrix ::new(vec![1.0,2.0],1,2){
-                let c = dot(&mut a,&mut b);
+                let _c = dot(&mut a,&mut b);
                 assert_eq!(1,1)
             }
         }
@@ -151,14 +150,36 @@ mod tests{
 
 
     #[test]
-    fn test_rcond(){
-        let mut b =  Matrix ::new(vec![4.0,3.0,8.0,6.00000001],2,2);
+    fn test_condition(){
+        let  b =  Matrix ::new(vec![500.0,50.0,100.0,100.0],2,2);
         let mut c = b.ok().unwrap();
-        let mut w =lu(&mut c);
-
-        let rc =  rcond(w.ok().unwrap(), Norm::InfinityNorm);
-        println!("{:?}",rc);
-
-        assert_eq!(1,1)
+        let rc =  cond(&mut c, Norm::InfinityNorm);
+        assert_eq!(rc.ok().unwrap(),Condition::WellConditioned)
     }
+
+    #[test]
+    fn test_inverse(){
+        let b = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 1.0,1.0,1.0,1.0,6.0],3,3);
+        let mut c = b.ok().unwrap();
+        if let Ok(_mat) = inverse(&mut c){
+            let b = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 1.0,1.0,1.0,1.0,6.0],3,3);
+            let mut c = b.ok().unwrap();
+            if let Ok(_mat1) =  pseudoinverse(&mut c){
+                assert_eq!(1,1)
+            }
+        }
+    }
+
+
+
+    // #[test]
+    // fn test_pseudoinverse(){
+    //     let b = Matrix ::new(vec![4.0,5.0,1.0,2.0],2,2);
+    //     let mut c = b.ok().unwrap();
+    //     let rc =  pseudoinverse(&mut c);
+    //     // println!("{:?}",rc);
+    //
+    //     // assert_eq!(rc.ok().unwrap(),Condition::WellConditioned)
+    // }
+
 }

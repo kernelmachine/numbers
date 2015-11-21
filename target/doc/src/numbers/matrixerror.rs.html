@@ -106,7 +106,7 @@
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MatrixError</span>{
     <span class='ident'>MismatchedDimensions</span>,
     <span class='ident'>MalformedMatrix</span>,
-    <span class='ident'>ZeroDeterminant</span>,
+    <span class='ident'>SingularMatrix</span>,
     <span class='ident'>LapackComputationError</span>,
     <span class='ident'>LapackInputError</span>,
     <span class='ident'>UnknownError</span>
@@ -119,7 +119,7 @@
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>{
             <span class='ident'>MatrixError</span>::<span class='ident'>MismatchedDimensions</span><span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Operation cannot be performed. Mismatched dimensions.&quot;</span>),
             <span class='ident'>MatrixError</span>::<span class='ident'>MalformedMatrix</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Matrix is malformed.&quot;</span>),
-            <span class='ident'>MatrixError</span>::<span class='ident'>ZeroDeterminant</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Operation cannot be performed. Matrix has zero determinant.&quot;</span>),
+            <span class='ident'>MatrixError</span>::<span class='ident'>SingularMatrix</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Operation cannot be performed. Matrix has zero determinant.&quot;</span>),
             <span class='ident'>MatrixError</span>::<span class='ident'>LapackComputationError</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Failure in the course of computation.&quot;</span>),
             <span class='ident'>MatrixError</span>::<span class='ident'>LapackInputError</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;Illegal argument detected.&quot;</span>),
             <span class='ident'>MatrixError</span>::<span class='ident'>UnknownError</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>,<span class='string'>&quot;Unknown error, please submit bug.&quot;</span>)
@@ -134,7 +134,7 @@
 
             <span class='ident'>MatrixError</span>::<span class='ident'>MismatchedDimensions</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Operation cannot be performed. Mismatched dimensions.&quot;</span>,
             <span class='ident'>MatrixError</span>::<span class='ident'>MalformedMatrix</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Matrix is malformed.&quot;</span>,
-            <span class='ident'>MatrixError</span>::<span class='ident'>ZeroDeterminant</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Operation cannot be performed. Matrix has zero determinant.&quot;</span>,
+            <span class='ident'>MatrixError</span>::<span class='ident'>SingularMatrix</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Operation cannot be performed. Matrix has zero determinant.&quot;</span>,
             <span class='ident'>MatrixError</span>::<span class='ident'>LapackComputationError</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Failure in the course of computation.&quot;</span>,
             <span class='ident'>MatrixError</span>::<span class='ident'>LapackInputError</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Illegal argument detected.&quot;</span>,
             <span class='ident'>MatrixError</span>::<span class='ident'>UnknownError</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Unknown error, please submit bug.&quot;</span>
@@ -146,7 +146,7 @@
       <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
           <span class='ident'>MatrixError</span>::<span class='ident'>MismatchedDimensions</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
           <span class='ident'>MatrixError</span>::<span class='ident'>MalformedMatrix</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
-          <span class='ident'>MatrixError</span>::<span class='ident'>ZeroDeterminant</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+          <span class='ident'>MatrixError</span>::<span class='ident'>SingularMatrix</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
           <span class='ident'>MatrixError</span>::<span class='ident'>LapackComputationError</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
           <span class='ident'>MatrixError</span>::<span class='ident'>LapackInputError</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
           <span class='ident'>MatrixError</span>::<span class='ident'>UnknownError</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>

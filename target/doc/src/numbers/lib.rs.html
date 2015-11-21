@@ -305,6 +305,25 @@
 <span id="263">263</span>
 <span id="264">264</span>
 <span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Numbers provides safe, modular, and fast high-dimensional matrix computations.</span>
 
@@ -329,6 +348,7 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>scalars</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>solvers</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>factorizations</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>rank</span>;
 
 <span class='kw'>use</span> <span class='ident'>matrixerror</span>::<span class='ident'>MatrixError</span>;
 <span class='kw'>use</span> <span class='ident'>rand</span>::{<span class='ident'>thread_rng</span>, <span class='ident'>Rng</span>, <span class='ident'>Rand</span>};
@@ -348,16 +368,33 @@
 
 <span class='doccomment'>/// Triangular represents two variants of triangular matrices : Upper and Lower. Use this enum</span>
 <span class='doccomment'>/// for functions that require specification of triangular matrix output.</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Triangular</span>{
     <span class='ident'>Upper</span>,
     <span class='ident'>Lower</span>
 }
 
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Norm</span>{
+    <span class='ident'>OneNorm</span>,
+    <span class='ident'>InfinityNorm</span>,
+    <span class='ident'>FrobeniusNorm</span>,
+    <span class='ident'>MaxAbsValue</span>
+}
 <span class='doccomment'>/// For relevant functions, Eig represents the option to output either just eigenvalues or</span>
 <span class='doccomment'>/// both eigenvalues and eigenvectors.</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Eig</span> {
     <span class='ident'>Eigenvalues</span>,
     <span class='ident'>EigenvaluesAndEigenvectors</span>,
+}
+
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Condition</span> {
+    <span class='ident'>WellConditioned</span>,
+    <span class='ident'>IllConditioned</span>,
+    <span class='ident'>Singular</span>,
+    <span class='ident'>NA</span>
 }
 
 <span class='doccomment'>/// Type declaration of Singular Value Decomposition Output</span>
@@ -570,6 +607,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>submatrix</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>start</span> : (<span class='ident'>usize</span>,<span class='ident'>usize</span>), <span class='ident'>dim</span> : (<span class='ident'>usize</span>,<span class='ident'>usize</span>)) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='macro'>unimplemented</span><span class='macro'>!</span>();
     }
+
 }
 </pre>
 </section>
