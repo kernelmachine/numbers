@@ -1,8 +1,9 @@
-use super::{Matrix, SVD};
+use super::{Matrix, SVD, Eig, Triangular};
 use std::cmp::{min,max};
 use lapack::*;
 use matrixerror::MatrixError;
-use scalars::*;
+use eigenvalues::*;
+use operations::*;
 
 /// Compute the LU factorization.
 pub fn lu(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
@@ -94,6 +95,18 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
 
 }
 
+
+/// Get the singular values of a matrix.
+pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
+        let mut at =  a.transpose();
+        let adjoint_operator = dot(&mut at,a);
+        let e = eigenvalues(&mut adjoint_operator.unwrap(), Eig :: Eigenvalues, Triangular::Upper);
+         match matrix_map(&|x : &f64| x.sqrt(), &mut e.unwrap()) {
+                Ok(mat) => Ok(mat),
+                Err(mat) => Err(mat),
+         }
+
+}
 
 /// Compute the Cholesky Factorization.
 pub fn cholesky(){

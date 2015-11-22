@@ -133,6 +133,12 @@
 <span id="91">91</span>
 <span id="92">92</span>
 <span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Matrix</span>,<span class='ident'>Triangular</span>};
 <span class='kw'>use</span> <span class='ident'>blas</span>::<span class='op'>*</span>;
@@ -216,7 +222,7 @@
     <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>SingularMatrix</span>)
 }
 
-<span class='doccomment'>/// Derive the pseudoinverse of a matrix via SVD. </span>
+<span class='doccomment'>/// Derive the pseudoinverse of a matrix via SVD.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pseudoinverse</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> ) <span class='op'>-&gt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span> {
 
     <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>((<span class='kw-2'>mut</span> <span class='ident'>u</span>,<span class='kw-2'>mut</span> <span class='ident'>e</span>, <span class='kw-2'>mut</span> <span class='ident'>vt</span>)) <span class='op'>=</span> <span class='ident'>svd</span>(<span class='ident'>a</span>) {
@@ -226,6 +232,12 @@
         <span class='kw'>return</span> <span class='ident'>m</span>
     }
     <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span>::<span class='ident'>LapackComputationError</span>)
+
+}
+
+
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>nullspace</span>(){
+    <span class='macro'>unimplemented</span><span class='macro'>!</span>();
 }
 </pre>
 </section>

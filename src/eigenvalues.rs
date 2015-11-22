@@ -1,6 +1,5 @@
 use super::{Matrix, Eig, Triangular};
 use lapack::*;
-use operations::*;
 use matrixerror::MatrixError;
 
 
@@ -36,15 +35,7 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
 
 }
 
-
-/// Get the singular values of a matrix.
-pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
-        let mut at =  a.transpose();
-        let adjoint_operator = dot(&mut at,a);
-        let e = eigenvalues(&mut adjoint_operator.unwrap(), Eig :: Eigenvalues, Triangular::Upper);
-         match matrix_map(&|x : &f64| x.sqrt(), &mut e.unwrap()) {
-                Ok(mat) => Ok(mat),
-                Err(mat) => Err(mat),
-         }
-
+// Get the eigenvalues of a hermitian matrix.
+pub fn eigsh(){
+    unimplemented!();
 }

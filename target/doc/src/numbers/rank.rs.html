@@ -106,6 +106,11 @@
 <span id="64">64</span>
 <span id="65">65</span>
 <span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
 </pre><pre class='rust '>
 <span class='comment'>// rcond, rank,</span>
 <span class='comment'>//     det, invlndet,</span>
@@ -134,7 +139,12 @@
 
 }
 
-<span class='doccomment'>/// Calculate the condition of a matrix via the condition number.</span>
+<span class='doccomment'>/// Get the number of linearly independent rows or columns.</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>rank</span>() {
+    <span class='macro'>unimplemented</span><span class='macro'>!</span>()
+}
+
+<span class='doccomment'>/// Determine the condition of a matrix via the condition number.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cond</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span> <span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>inorm</span> : <span class='ident'>Norm</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Condition</span>, <span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
     <span class='kw'>let</span> <span class='ident'>nm</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>inorm</span> {
          <span class='ident'>Norm</span> :: <span class='ident'>OneNorm</span> <span class='op'>=&gt;</span> <span class='string'>b&#39;1&#39;</span>,

@@ -29,3 +29,19 @@ pub fn lusolve(lu : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Resu
 
 
 }
+
+/// Solve Ax = b via least squares error solution.
+
+pub fn linearsolve(){
+    unimplemented!();
+}
+
+/// Solve Ax = b via SVD.
+pub fn svdsolve(){
+    unimplemented!();
+}
+
+/// Solve Ax = b via Cholesky decomposition.
+pub fn cholsolve(){
+    unimplemented!();
+}

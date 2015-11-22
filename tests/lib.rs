@@ -7,7 +7,7 @@ extern crate num;
 #[cfg(test)]
 mod tests{
     use numbers::{Matrix, Eig, Triangular, Norm, Condition};
-    use numbers::scalars::*;
+    use numbers::eigenvalues::*;
     use numbers::solvers::*;
     use numbers::operations::*;
     use numbers::factorizations::*;

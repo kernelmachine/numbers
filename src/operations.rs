@@ -80,7 +80,7 @@ pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
     Err(MatrixError::SingularMatrix)
 }
 
-/// Derive the pseudoinverse of a matrix via SVD. 
+/// Derive the pseudoinverse of a matrix via SVD.
 pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 
     if let Ok((mut u,mut e, mut vt)) = svd(a) {
@@ -90,4 +90,10 @@ pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
         return m
     }
     Err(MatrixError::LapackComputationError)
+
+}
+
+
+pub fn nullspace(){
+    unimplemented!();
 }

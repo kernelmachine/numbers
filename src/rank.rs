@@ -25,7 +25,12 @@ pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
 
 }
 
-/// Calculate the condition of a matrix via the condition number.
+/// Get the number of linearly independent rows or columns.
+pub fn rank() {
+    unimplemented!()
+}
+
+/// Determine the condition of a matrix via the condition number.
 pub fn cond(a : &mut Matrix <f64>, inorm : Norm) -> Result<Condition, MatrixError>{
     let nm = match inorm {
          Norm :: OneNorm => b'1',
