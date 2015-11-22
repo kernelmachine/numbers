@@ -290,7 +290,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         unimplemented!();
     }
 
-    // Check whether matrix is diagonalizable
+    /// Check whether matrix is diagonalizable
     pub fn is_diagonalizable() -> bool {
         unimplemented!();
     }
