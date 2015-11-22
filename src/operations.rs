@@ -1,11 +1,11 @@
-use super::{Matrix,Triangular};
+use super::{Matrix,Triangular, Eig};
 use blas::*;
 use lapack::dgetri;
 use num::traits::Num;
 use rand :: Rand;
 use matrixerror::MatrixError;
 use factorizations::*;
-
+use eigenvalues::*;
 /// Compute dot product between two matrices.
 pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>{
         if a.col_size != b.row_size {
@@ -96,4 +96,53 @@ pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 /// Get the nullspace (kernel) of a matrix. (x where Ax = 0)
 pub fn nullspace(){
     unimplemented!();
+}
+
+/// Check whether a matrix is unitary. A^T A = I
+pub fn is_unitary(a : &mut Matrix<f64> ) -> Result<bool, MatrixError>{
+    if a.row_size != a.col_size {
+        return Err(MatrixError::NonSquareMatrix)
+    }
+
+    let mut at = a.transpose();
+    let d = dot (a, &mut at).ok().unwrap();
+    let l : Matrix <f64> = Matrix::identity(a.row_size);
+    Ok(d == l)
+}
+
+/// Check whether a matrix is diagonalizable
+pub fn is_diagonalizable(a : &mut Matrix <f64>) -> Result<bool, MatrixError> {
+    if a.row_size != a.col_size {
+        return Err(MatrixError::NonSquareMatrix)
+    }
+
+    if is_normal(a).ok().unwrap(){ println!("normal"); Ok(true)}
+    else{
+        Ok(eigenvalues(a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap().elements.len() == a.row_size)
+    }
+}
+
+/// Check whether a matrix is normal. A^T A = A A ^ T
+pub fn is_normal(a : &mut Matrix<f64>) -> Result<bool, MatrixError> {
+    if a.row_size != a.col_size {
+        return Err(MatrixError::NonSquareMatrix)
+    }
+    let mut at = a.transpose();
+    let inner = dot (a, &mut at).ok().unwrap();
+    let outer = dot (&mut at, a).ok().unwrap();
+    Ok(inner==outer)
+
+}
+
+
+
+
+/// Check whether a matrix is symmetric. A^T == A.
+pub fn is_symmetric(a : &mut Matrix<f64>) -> Result<bool, MatrixError>{
+    if a.row_size != a.col_size {
+        return Err(MatrixError::NonSquareMatrix)
+    }
+    let mut at = a.transpose();
+    Ok(a == &mut at)
+
 }

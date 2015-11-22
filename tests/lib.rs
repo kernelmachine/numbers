@@ -171,6 +171,18 @@ mod tests{
     }
 
 
+    #[test]
+    fn test_is_diagonalizable(){
+        let a = Matrix :: new(vec![-1.0,3.0,-1.0, -3.0,5.0,-1.0,-3.0,3.0,1.0],3,3);
+        assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap() == true)
+    }
+    #[test]
+    fn test_is_not_diagonalizable(){
+        let a = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3);
+        println!("{:?}",is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap())
+        // assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap() == true)
+    }
+
 
     // #[test]
     // fn test_pseudoinverse(){

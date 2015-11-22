@@ -5,6 +5,7 @@ use std::fmt;
 #[derive(Debug)]
 pub enum MatrixError{
     MismatchedDimensions,
+    NonSquareMatrix,
     MalformedMatrix,
     SingularMatrix,
     LapackComputationError,
@@ -18,6 +19,7 @@ impl fmt::Display for MatrixError{
 
         match *self{
             MatrixError::MismatchedDimensions=> write!(f, "Operation cannot be performed. Mismatched dimensions."),
+            MatrixError::NonSquareMatrix=> write!(f, "Operation cannot be performed. Matrix is not square."),
             MatrixError::MalformedMatrix => write!(f, "Matrix is malformed."),
             MatrixError::SingularMatrix => write!(f, "Operation cannot be performed. Matrix has zero determinant."),
             MatrixError::LapackComputationError => write!(f, "Failure in the course of computation."),
@@ -33,6 +35,7 @@ impl error::Error for MatrixError{
         match *self{
 
             MatrixError::MismatchedDimensions => "Operation cannot be performed. Mismatched dimensions.",
+            MatrixError::NonSquareMatrix => "Operation cannot be performed. Matrix is not square.",
             MatrixError::MalformedMatrix => "Matrix is malformed.",
             MatrixError::SingularMatrix => "Operation cannot be performed. Matrix has zero determinant.",
             MatrixError::LapackComputationError => "Failure in the course of computation.",
@@ -45,6 +48,7 @@ impl error::Error for MatrixError{
     fn cause(&self) -> Option<&error::Error> {
       match *self {
           MatrixError::MismatchedDimensions => None,
+          MatrixError::NonSquareMatrix => None,
           MatrixError::MalformedMatrix => None,
           MatrixError::SingularMatrix => None,
           MatrixError::LapackComputationError => None,

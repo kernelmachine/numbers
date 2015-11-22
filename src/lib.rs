@@ -285,20 +285,6 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     unimplemented!();
     }
 
-    /// Check whether matrix is unitary.
-    pub fn is_unitary() -> bool{
-        unimplemented!();
-    }
 
-    /// Check whether matrix is diagonalizable
-    pub fn is_diagonalizable() -> bool {
-        unimplemented!();
-    }
-
-
-    /// check whether matrix is hermitian/symmetric.
-    pub fn is_hermitian() -> bool{
-        unimplemented!();
-    }
 
 }
