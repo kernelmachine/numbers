@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cond",""],["norm",""]]});
+initSidebarItems({"fn":[["cond","Calculate the condition of a matrix via the condition number."],["norm","Calculate the norm of a matrix (1-Norm, Infinity-Norm, Frobenius Norm, or Max Absolute Value)"]]});

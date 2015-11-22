@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["lusolve",""]]});
+initSidebarItems({"fn":[["lusolve","Solve Ax = b via LU Factorization."]]});

@@ -150,6 +150,10 @@
 <span id="108">108</span>
 <span id="109">109</span>
 <span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Matrix</span>, <span class='ident'>SVD</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::{<span class='ident'>min</span>,<span class='ident'>max</span>};
@@ -157,7 +161,7 @@
 <span class='kw'>use</span> <span class='ident'>matrixerror</span>::<span class='ident'>MatrixError</span>;
 <span class='kw'>use</span> <span class='ident'>scalars</span>::<span class='op'>*</span>;
 
-
+<span class='doccomment'>/// Compute the LU factorization.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lu</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i32</span><span class='op'>&gt;</span>), <span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
     <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
     <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>col_size</span>;
@@ -175,6 +179,7 @@
 }
 
 
+<span class='doccomment'>/// Compute the QR Factorization.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>qr</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
     <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
     <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>col_size</span>;
@@ -197,7 +202,7 @@
     }
 }
 
-
+<span class='doccomment'>/// Compute the SVD Factorization.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>svd</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span> <span class='op'>&lt;</span><span class='ident'>SVD</span>, <span class='ident'>MatrixError</span><span class='op'>&gt;</span> {
     <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
     <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>col_size</span>;
@@ -247,16 +252,19 @@
 }
 
 
+<span class='doccomment'>/// Compute the Cholesky Factorization.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cholesky</span>(){
     <span class='macro'>unimplemented</span><span class='macro'>!</span>();
 }
 
+<span class='doccomment'>/// Compute the Hessenberg Factorization.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>hess</span>(){
     <span class='macro'>unimplemented</span><span class='macro'>!</span>();
 
 
 }
 
+<span class='doccomment'>/// Compute the Schur Factorization.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>schur</span>(){
     <span class='macro'>unimplemented</span><span class='macro'>!</span>();
 

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cholesky",""],["hess",""],["lu",""],["qr",""],["schur",""],["svd",""]]});
+initSidebarItems({"fn":[["cholesky","Compute the Cholesky Factorization."],["hess","Compute the Hessenberg Factorization."],["lu","Compute the LU factorization."],["qr","Compute the QR Factorization."],["schur","Compute the Schur Factorization."],["svd","Compute the SVD Factorization."]]});
