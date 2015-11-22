@@ -280,7 +280,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
 
 
 
-    // Get a submatrix from a matrix.
+    /// Get a submatrix from a matrix.
     pub fn submatrix(&self, start : (usize,usize), dim : (usize,usize)) -> Matrix<T> {
     unimplemented!();
     }

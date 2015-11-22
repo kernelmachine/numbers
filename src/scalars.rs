@@ -5,7 +5,7 @@ use matrixerror::MatrixError;
 
 
 
-// get the eigenvalues of a matrix.
+/// Get the eigenvalues of a matrix.
 pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result<Matrix<f64>,MatrixError>{
     let n = a.col_size;
     let mut w = vec![0.0; n];
@@ -37,7 +37,7 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
 }
 
 
-
+/// Get the singular values of a matrix.
 pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
         let mut at =  a.transpose();
         let adjoint_operator = dot(&mut at,a);

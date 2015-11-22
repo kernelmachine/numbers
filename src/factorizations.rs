@@ -4,7 +4,7 @@ use lapack::*;
 use matrixerror::MatrixError;
 use scalars::*;
 
-
+/// Compute the LU factorization.
 pub fn lu(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
     let m = a.row_size;
     let n = a.col_size;
@@ -22,6 +22,7 @@ pub fn lu(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixEr
 }
 
 
+/// Compute the QR Factorization.
 pub fn qr(a : &mut Matrix<f64>) ->Result<Matrix<f64>,MatrixError>{
     let m = a.row_size;
     let n = a.col_size;
@@ -44,7 +45,7 @@ pub fn qr(a : &mut Matrix<f64>) ->Result<Matrix<f64>,MatrixError>{
     }
 }
 
-
+/// Compute the SVD Factorization.
 pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
     let m = a.row_size;
     let n = a.col_size;
@@ -94,16 +95,19 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
 }
 
 
+/// Compute the Cholesky Factorization.
 pub fn cholesky(){
     unimplemented!();
 }
 
+/// Compute the Hessenberg Factorization.
 pub fn hess(){
     unimplemented!();
 
 
 }
 
+/// Compute the Schur Factorization.
 pub fn schur(){
     unimplemented!();
 

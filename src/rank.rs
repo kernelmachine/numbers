@@ -7,6 +7,8 @@ use super::{Matrix,Norm, Condition};
 use matrixerror::MatrixError;
 use lapack::*;
 use factorizations::*;
+
+/// Calculate the norm of a matrix (1-Norm, Infinity-Norm, Frobenius Norm, or Max Absolute Value)
 pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
     let norm = match inorm {
          Norm :: OneNorm => b'1',
@@ -23,6 +25,7 @@ pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
 
 }
 
+/// Calculate the condition of a matrix via the condition number.
 pub fn cond(a : &mut Matrix <f64>, inorm : Norm) -> Result<Condition, MatrixError>{
     let nm = match inorm {
          Norm :: OneNorm => b'1',
