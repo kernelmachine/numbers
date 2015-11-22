@@ -90,4 +90,21 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
     }
 
 
+
+}
+
+
+pub fn cholesky(){
+    unimplemented!();
+}
+
+pub fn hess(){
+    unimplemented!();
+
+
+}
+
+pub fn schur(){
+    unimplemented!();
+
 }

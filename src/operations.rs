@@ -24,10 +24,15 @@ pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, M
             col_size : n,
             transpose : false,
         })
-
-
 }
 
+pub fn kronecker(){
+    unimplemented!();
+}
+
+pub fn cross() {
+    unimplemented!()
+}
 
 pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Result<Matrix<T>, MatrixError>{
       Ok(Matrix {
@@ -72,15 +77,10 @@ pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 
     if let Ok((mut u,mut e, mut vt)) = svd(a) {
-        
         let inv_e = matrix_map(&|x : &f64| if x > &0.0 { x.recip()} else { 0.0 },&mut e);
         let d = dot(&mut u, &mut inv_e.ok().unwrap().transpose());
         let m = dot (&mut d.ok().unwrap(), &mut vt);
         return m
-
-
     }
     Err(MatrixError::LapackComputationError)
-    // take inverse of singualr vectors in SVD factorization
-
 }

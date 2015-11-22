@@ -324,6 +324,10 @@
 <span id="282">282</span>
 <span id="283">283</span>
 <span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Numbers provides safe, modular, and fast high-dimensional matrix computations.</span>
 
@@ -367,13 +371,14 @@
 }
 
 <span class='doccomment'>/// Triangular represents two variants of triangular matrices : Upper and Lower. Use this enum</span>
-<span class='doccomment'>/// for functions that require specification of triangular matrix output.</span>
+<span class='doccomment'>/// for functions that require specification of a triangular matrix output.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Triangular</span>{
     <span class='ident'>Upper</span>,
     <span class='ident'>Lower</span>
 }
 
+<span class='doccomment'>/// Norm provides four variants of matrix norms.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Norm</span>{
     <span class='ident'>OneNorm</span>,
@@ -389,6 +394,7 @@
     <span class='ident'>EigenvaluesAndEigenvectors</span>,
 }
 
+<span class='doccomment'>/// Condition provides four matrix conditions to determine the feasibility of inversion</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Condition</span> {
     <span class='ident'>WellConditioned</span>,
@@ -485,7 +491,7 @@
 
 <span class='kw'>impl</span> <span class='op'>&lt;</span><span class='ident'>T</span>:<span class='ident'>Num</span> <span class='op'>+</span> <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Rand</span><span class='op'>&gt;</span> <span class='ident'>Matrix</span> <span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
 
-    <span class='comment'>// create new Matrix</span>
+    <span class='doccomment'>/// Create a new matrix</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>e</span> : <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>r_size</span> : <span class='ident'>usize</span>, <span class='ident'>c_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
         <span class='kw'>if</span> <span class='ident'>r_size</span> <span class='op'>*</span> <span class='ident'>c_size</span> <span class='op'>!=</span> <span class='ident'>e</span>.<span class='ident'>len</span>(){
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span> :: <span class='ident'>MalformedMatrix</span>)
@@ -498,7 +504,7 @@
         })
     }
 
-    <span class='comment'>// creates matrix of zeros</span>
+    <span class='doccomment'>/// Create a matrix of zeros</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>zeros</span> (<span class='ident'>r_size</span> : <span class='ident'>usize</span>, <span class='ident'>c_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
         <span class='ident'>Matrix</span> {
             <span class='ident'>elements</span> : <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Zero</span>::<span class='ident'>zero</span>();<span class='ident'>r_size</span><span class='op'>*</span><span class='ident'>c_size</span>],
@@ -508,7 +514,7 @@
         }
     }
 
-    <span class='comment'>// creates matrix of random elements</span>
+    <span class='comment'>// Create a matrix of random elements.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>random</span>(<span class='ident'>r_size</span> : <span class='ident'>usize</span>, <span class='ident'>c_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
         <span class='kw'>let</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>rand</span>::<span class='ident'>thread_rng</span>()
         .<span class='ident'>gen_iter</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>()
@@ -523,6 +529,7 @@
         }
     }
 
+    <span class='doccomment'>/// Create a square diagonal matrix from a vector of elements.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>diag_mat</span> (<span class='ident'>a</span> : <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mat</span> <span class='op'>=</span> <span class='ident'>Matrix</span> :: <span class='ident'>zeros</span>(<span class='ident'>a</span>.<span class='ident'>len</span>(),<span class='ident'>a</span>.<span class='ident'>len</span>());
         <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>1</span>..<span class='ident'>a</span>.<span class='ident'>len</span>()<span class='op'>+</span><span class='number'>1</span>{
@@ -532,17 +539,18 @@
         <span class='ident'>mat</span>
     }
 
+    <span class='doccomment'>/// Create an square identity matrix of specified row size.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>identity</span>(<span class='ident'>row_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
           <span class='ident'>Matrix</span> :: <span class='ident'>diag_mat</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>One</span>::<span class='ident'>one</span>(); <span class='ident'>row_size</span>])
     }
 
-
+    <span class='doccomment'>/// Replace a value in the matrix at specified row and column indices.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>,<span class='ident'>row</span>: <span class='ident'>usize</span>, <span class='ident'>col</span>:<span class='ident'>usize</span>, <span class='ident'>value</span> : <span class='ident'>T</span>) <span class='op'>-&gt;</span> () {
         <span class='kw'>let</span> <span class='ident'>ind</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_ind</span>(<span class='ident'>row</span>,<span class='ident'>col</span>);
         <span class='self'>self</span>.<span class='ident'>elements</span>[<span class='ident'>ind</span>] <span class='op'>=</span> <span class='ident'>value</span>;
     }
 
-    <span class='comment'>// map index in matrix to index in 1-d vector</span>
+    <span class='doccomment'>/// Map an index in a matrix to index in its corresponding 1-d vector.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_ind</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>row</span> :<span class='ident'>usize</span>, <span class='ident'>col</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span>{
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>transpose</span> <span class='op'>==</span> <span class='boolval'>true</span>{
             <span class='kw'>return</span> (<span class='ident'>row</span><span class='op'>-</span><span class='number'>1</span>)<span class='op'>+</span> (<span class='ident'>col</span><span class='op'>-</span><span class='number'>1</span>)<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>row_size</span>
@@ -550,14 +558,14 @@
         (<span class='ident'>col</span><span class='op'>-</span><span class='number'>1</span>) <span class='op'>+</span>(<span class='ident'>row</span><span class='op'>-</span><span class='number'>1</span>)<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>col_size</span>
     }
 
-    <span class='comment'>// get an element from the matrix</span>
+    <span class='doccomment'>/// Get an element from the matrix.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_element</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>row</span> : <span class='ident'>usize</span>, <span class='ident'>col</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>{
         <span class='kw'>let</span> <span class='ident'>elem</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>elements</span>[<span class='self'>self</span>.<span class='ident'>get_ind</span>(<span class='ident'>row</span>,<span class='ident'>col</span>)];
         <span class='ident'>elem</span>.<span class='ident'>to_owned</span>()
     }
 
 
-    <span class='comment'>// transpose matrix. We&#39;re not actually changing anything in memory.</span>
+    <span class='doccomment'>/// Transpose the matrix. We&#39;re not actually changing anything in memory;</span>
     <span class='comment'>// we just flag the matrix as transpose to change pointer reference to elements.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>transpose</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Matrix</span> {
@@ -568,7 +576,7 @@
         }
     }
 
-    <span class='comment'>// get the diagonal of a matrix.</span>
+    <span class='doccomment'>/// Get the diagonal of a matrix.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>diagonal</span> (<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>diag</span> : <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span> :: <span class='ident'>new</span>();
         <span class='kw'>for</span> <span class='ident'>elem</span> <span class='kw'>in</span> <span class='number'>1</span>..<span class='ident'>min</span>(<span class='self'>self</span>.<span class='ident'>row_size</span>,<span class='self'>self</span>.<span class='ident'>col_size</span>){
@@ -577,7 +585,7 @@
         <span class='ident'>diag</span>
     }
 
-
+    <span class='doccomment'>/// Get a triangular matrix with specified dimensions above or below specified diagonal.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>tri</span> (<span class='ident'>row_size</span>:<span class='ident'>usize</span>, <span class='ident'>col_size</span> : <span class='ident'>usize</span>, <span class='ident'>k</span> : <span class='ident'>usize</span>, <span class='ident'>upper_or_lower</span> : <span class='ident'>Triangular</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mat</span> : <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Matrix</span> :: <span class='ident'>zeros</span>(<span class='ident'>row_size</span>, <span class='ident'>col_size</span>);
         <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>1</span>..<span class='ident'>row_size</span><span class='op'>+</span><span class='number'>1</span>{
@@ -603,7 +611,7 @@
 
 
 
-    <span class='comment'>// get a submatrix from a matrix.</span>
+    <span class='comment'>// Get a submatrix from a matrix.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>submatrix</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>start</span> : (<span class='ident'>usize</span>,<span class='ident'>usize</span>), <span class='ident'>dim</span> : (<span class='ident'>usize</span>,<span class='ident'>usize</span>)) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='macro'>unimplemented</span><span class='macro'>!</span>();
     }

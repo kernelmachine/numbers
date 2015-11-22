@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["lu",""],["qr",""],["svd",""]]});
+initSidebarItems({"fn":[["cholesky",""],["hess",""],["lu",""],["qr",""],["schur",""],["svd",""]]});

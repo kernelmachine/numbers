@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["dot",""],["inverse",""],["matrix_map",""],["pseudoinverse",""],["tril",""],["triu",""]]});
+initSidebarItems({"fn":[["cross",""],["dot",""],["inverse",""],["kronecker",""],["matrix_map",""],["pseudoinverse",""],["tril",""],["triu",""]]});

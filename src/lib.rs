@@ -40,13 +40,14 @@ pub struct Matrix <T : Num + Clone + Rand> {
 }
 
 /// Triangular represents two variants of triangular matrices : Upper and Lower. Use this enum
-/// for functions that require specification of triangular matrix output.
+/// for functions that require specification of a triangular matrix output.
 #[derive(Debug, Clone)]
 pub enum Triangular{
     Upper,
     Lower
 }
 
+/// Norm provides four variants of matrix norms.
 #[derive(Debug, Clone)]
 pub enum Norm{
     OneNorm,
@@ -62,6 +63,7 @@ pub enum Eig {
     EigenvaluesAndEigenvectors,
 }
 
+/// Condition provides four matrix conditions to determine the feasibility of inversion
 #[derive(Debug, Clone, PartialEq)]
 pub enum Condition {
     WellConditioned,
@@ -158,7 +160,7 @@ impl <T : Num + Clone + Rand> PartialEq for Matrix<T>{
 
 impl <T:Num + Clone + Rand> Matrix <T>{
 
-    // create new Matrix
+    /// Create a new matrix
     pub fn new(e : Vec<T>, r_size : usize, c_size : usize) -> Result<Matrix<T>, MatrixError>{
         if r_size * c_size != e.len(){
             return Err(MatrixError :: MalformedMatrix)
@@ -171,7 +173,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         })
     }
 
-    // creates matrix of zeros
+    /// Create a matrix of zeros
     pub fn zeros (r_size : usize, c_size : usize) -> Matrix<T>{
         Matrix {
             elements : vec![Zero::zero();r_size*c_size],
@@ -181,7 +183,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         }
     }
 
-    // creates matrix of random elements
+    // Create a matrix of random elements.
     pub fn random(r_size : usize, c_size : usize) -> Matrix<T>{
         let e = rand::thread_rng()
         .gen_iter::<T>()
@@ -196,6 +198,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         }
     }
 
+    /// Create a square diagonal matrix from a vector of elements.
     pub fn diag_mat (a : Vec<T>) -> Matrix<T> {
         let mut mat = Matrix :: zeros(a.len(),a.len());
         for i in 1..a.len()+1{
@@ -205,17 +208,18 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         mat
     }
 
+    /// Create an square identity matrix of specified row size.
     pub fn identity(row_size : usize) -> Matrix<T> {
           Matrix :: diag_mat(vec![One::one(); row_size])
     }
 
-
+    /// Replace a value in the matrix at specified row and column indices.
     pub fn replace(&mut self,row: usize, col:usize, value : T) -> () {
         let ind = self.get_ind(row,col);
         self.elements[ind] = value;
     }
 
-    // map index in matrix to index in 1-d vector
+    /// Map an index in a matrix to index in its corresponding 1-d vector.
     pub fn get_ind(&self, row :usize, col : usize) -> usize{
         if self.transpose == true{
             return (row-1)+ (col-1)*self.row_size
@@ -223,14 +227,14 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         (col-1) +(row-1)*self.col_size
     }
 
-    // get an element from the matrix
+    /// Get an element from the matrix.
     pub fn get_element(&self, row : usize, col : usize) -> T{
         let elem = &self.elements[self.get_ind(row,col)];
         elem.to_owned()
     }
 
 
-    // transpose matrix. We're not actually changing anything in memory.
+    /// Transpose the matrix. We're not actually changing anything in memory;
     // we just flag the matrix as transpose to change pointer reference to elements.
     pub fn transpose(&self) -> Matrix<T> {
         Matrix {
@@ -241,7 +245,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         }
     }
 
-    // get the diagonal of a matrix.
+    /// Get the diagonal of a matrix.
     pub fn diagonal (&self) -> Vec<T>{
         let mut diag : Vec<T> = Vec :: new();
         for elem in 1..min(self.row_size,self.col_size){
@@ -250,7 +254,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
         diag
     }
 
-
+    /// Get a triangular matrix with specified dimensions above or below specified diagonal.
     pub fn tri (row_size:usize, col_size : usize, k : usize, upper_or_lower : Triangular) -> Matrix<T>{
         let mut mat : Matrix<T> = Matrix :: zeros(row_size, col_size);
         for i in 1..row_size+1{
@@ -276,7 +280,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
 
 
 
-    // get a submatrix from a matrix.
+    // Get a submatrix from a matrix.
     pub fn submatrix(&self, start : (usize,usize), dim : (usize,usize)) -> Matrix<T> {
     unimplemented!();
     }
