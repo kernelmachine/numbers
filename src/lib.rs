@@ -36,7 +36,7 @@ pub struct Matrix <T : Num + Clone + Rand> {
     pub elements : Vec<T>,
     pub row_size : usize,
     pub col_size : usize,
-    pub transpose :  bool,
+    pub transpose : Trans,
 }
 
 /// Triangular represents two variants of triangular matrices : Upper and Lower. Use this enum
@@ -72,6 +72,12 @@ pub enum Condition {
     NA
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum Trans {
+    Transpose,
+    Regular
+}
+
 /// Type declaration of Singular Value Decomposition Output
 pub type SVD = (Matrix<f64>, Matrix<f64>, Matrix<f64>);
 
@@ -88,7 +94,7 @@ impl<'a, 'b, T : Num + Clone + Rand> Add<&'b Matrix<T>> for &'a Matrix<T> {
             elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x+y).collect(),
             row_size : self.row_size,
             col_size : other.col_size,
-            transpose : false})
+            transpose : Trans :: Regular})
 
     }
 }
@@ -104,7 +110,7 @@ impl<'a, 'b, T : Num + Clone + Rand> Sub<&'b Matrix<T>> for &'a Matrix<T> {
         elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x-y).collect(),
         row_size : self.row_size,
         col_size : other.col_size,
-        transpose : false})
+        transpose : Trans :: Regular})
     }
 
 }
@@ -120,7 +126,7 @@ impl<'a, 'b, T : Num + Clone + Rand> Div<&'b Matrix<T>> for &'a Matrix<T> {
             elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x/y).collect(),
             row_size : self.row_size,
             col_size : other.col_size,
-            transpose : false}
+            transpose : Trans :: Regular}
         )
         }
     }
@@ -142,7 +148,7 @@ impl<'a, 'b, T : Num + Clone + Rand> Mul <&'b Matrix<T>> for &'a Matrix<T> {
             elements : self.elements.clone().zip_with(other.elements.clone(), |x,y| x*y).collect(),
             row_size : self.row_size,
             col_size : other.col_size,
-            transpose : false})
+            transpose : Trans :: Regular})
 
         }
     }
@@ -169,7 +175,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
             elements : e,
             row_size : r_size,
             col_size : c_size,
-            transpose : false,
+            transpose : Trans :: Regular,
         })
     }
 
@@ -179,7 +185,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
             elements : vec![Zero::zero();r_size*c_size],
             row_size : r_size,
             col_size : c_size,
-            transpose : false,
+            transpose : Trans :: Regular,
         }
     }
 
@@ -194,7 +200,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
             elements : e,
             row_size : r_size,
             col_size : c_size,
-            transpose : false,
+            transpose : Trans :: Regular,
         }
     }
 
@@ -221,7 +227,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
 
     /// Map an index in a matrix to index in its corresponding 1-d vector.
     pub fn get_ind(&self, row :usize, col : usize) -> usize{
-        if self.transpose == true{
+        if self.transpose == Trans :: Transpose{
             return (row-1)+ (col-1)*self.row_size
         }
         (col-1) +(row-1)*self.col_size
@@ -241,7 +247,7 @@ impl <T:Num + Clone + Rand> Matrix <T>{
             elements : self.elements.clone(),
             row_size : self.col_size,
             col_size : self.row_size,
-            transpose : match self.transpose { true => false, false => true}
+            transpose : match self.transpose { Trans :: Transpose => Trans :: Regular, Trans :: Regular => Trans :: Transpose}
         }
     }
 

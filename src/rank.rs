@@ -7,7 +7,6 @@ use super::{Matrix,Norm, Condition};
 use matrixerror::MatrixError;
 use lapack::*;
 use factorizations::*;
-
 /// Calculate the norm of a matrix (1-Norm, Infinity-Norm, Frobenius Norm, or Max Absolute Value)
 pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
     let norm = match inorm {
@@ -26,8 +25,14 @@ pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
 }
 
 /// Get the number of linearly independent rows or columns.
-pub fn rank() {
-    unimplemented!()
+pub fn rank(a : &mut Matrix<f64>) -> Result<usize, MatrixError> {
+
+    if let Ok(mut s) = singular_values(a) {
+        let z = &mut s.elements;
+        return Ok(z.iter().take_while(|x| *x > &0.0).collect::<Vec<&f64>>().len())
+    }
+    Ok(0 as usize)
+
 }
 
 /// Determine the condition of a matrix via the condition number.

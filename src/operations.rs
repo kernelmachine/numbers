@@ -1,4 +1,4 @@
-use super::{Matrix,Triangular, Eig};
+use super::{Matrix,Triangular, Eig, Trans};
 use blas::*;
 use lapack::dgetri;
 use num::traits::Num;
@@ -16,14 +16,22 @@ pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, M
         let n = b.col_size;
         let k = a.col_size;
 
+        let a_trans = match a.transpose {
+            Trans :: Regular => b'N',
+            Trans :: Transpose => b'T',
+        };
+        let b_trans = match b.transpose {
+            Trans :: Regular => b'N',
+            Trans :: Transpose => b'T',
+        };
 
         let mut c = vec![0.0; m*n];
-        dgemm(b'N', b'N', m, n, k, 1.0, &a.elements, m, &b.elements,k, 0.0,&mut c, m);
+        dgemm(a_trans, b_trans, m, n, k, 1.0, &a.elements, m, &b.elements,k, 0.0,&mut c, m);
         Ok(Matrix {
             elements : c,
             row_size : m,
             col_size : n,
-            transpose : false,
+            transpose : Trans :: Regular,
         })
 }
 
@@ -43,7 +51,7 @@ pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<
            elements: a.elements.iter().map(func).collect(),
            row_size : a.row_size,
            col_size : a.col_size,
-           transpose : false,
+           transpose : Trans :: Regular,
        })
 }
 
@@ -78,6 +86,21 @@ pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 
     }
     Err(MatrixError::SingularMatrix)
+}
+
+
+/// Get the trace of a matrix (the sum of its diagonal elements)
+pub fn trace(a: &mut Matrix<f64> ) -> f64{
+    let diag : Vec<f64> = a.diagonal();
+    diag.iter().fold(0.0,|a,&b| a + b)
+
+}
+
+/// Get the product of the diagonal elements of a matrix. 
+pub fn prod_diag(a: &mut Matrix<f64> ) -> f64{
+    let diag : Vec<f64> = a.diagonal();
+    diag.iter().fold(0.0,|a,&b| a * b)
+
 }
 
 /// Derive the pseudoinverse of a matrix via SVD.
@@ -118,6 +141,9 @@ pub fn is_diagonalizable(a : &mut Matrix <f64>) -> Result<bool, MatrixError> {
 
     if is_normal(a).ok().unwrap(){ println!("normal"); Ok(true)}
     else{
+        println!("{:?}",eigenvalues(a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap().elements);
+        println!("{:?}", a.row_size);
+
         Ok(eigenvalues(a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap().elements.len() == a.row_size)
     }
 }
@@ -128,8 +154,11 @@ pub fn is_normal(a : &mut Matrix<f64>) -> Result<bool, MatrixError> {
         return Err(MatrixError::NonSquareMatrix)
     }
     let mut at = a.transpose();
+
     let inner = dot (a, &mut at).ok().unwrap();
     let outer = dot (&mut at, a).ok().unwrap();
+    println!("{:?}", inner);
+    println!("{:?}", outer);
     Ok(inner==outer)
 
 }

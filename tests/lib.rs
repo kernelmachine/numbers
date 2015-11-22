@@ -6,7 +6,7 @@ extern crate num;
 
 #[cfg(test)]
 mod tests{
-    use numbers::{Matrix, Eig, Triangular, Norm, Condition};
+    use numbers::{Matrix, Eig, Triangular, Norm, Condition, Trans};
     use numbers::eigenvalues::*;
     use numbers::solvers::*;
     use numbers::operations::*;
@@ -96,7 +96,7 @@ mod tests{
     #[test]
     fn test_mul() {
         if let Ok(mat) = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3, 3){
-            let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: false };
+            let ans = Matrix { elements: vec![9.0, 1.0, 1.0, 1.0, 9.0, 1.0, 1.0, 1.0, 9.0], row_size: 3, col_size: 3, transpose: Trans :: Regular };
             assert_eq!((&mat * &mat).ok(), Some(ans))
         }
 
@@ -174,15 +174,21 @@ mod tests{
     #[test]
     fn test_is_diagonalizable(){
         let a = Matrix :: new(vec![-1.0,3.0,-1.0, -3.0,5.0,-1.0,-3.0,3.0,1.0],3,3);
-        assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap() == true)
+        assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap())
     }
     #[test]
+    #[should_panic]
     fn test_is_not_diagonalizable(){
         let a = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3);
-        println!("{:?}",is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap())
-        // assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap() == true)
+        assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap())
     }
 
+    #[test]
+    #[should_panic]
+    fn test_rank(){
+        let a = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3);
+        assert!(rank(&mut a.ok().unwrap()).ok().unwrap() == 3)
+    }
 
     // #[test]
     // fn test_pseudoinverse(){

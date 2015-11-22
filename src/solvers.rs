@@ -1,4 +1,4 @@
-use super::{Matrix};
+use super::{Matrix, Trans};
 use lapack::*;
 use factorizations::*;
 use matrixerror::MatrixError;
@@ -21,7 +21,7 @@ pub fn lusolve(lu : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Resu
             elements : b.elements.to_owned(),
             row_size : ldb,
             col_size : nrhs,
-            transpose : false
+            transpose : Trans :: Regular,
         }),
         -1 => Err(MatrixError::LapackInputError),
         _ => Err(MatrixError::UnknownError)

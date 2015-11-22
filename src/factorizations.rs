@@ -1,4 +1,4 @@
-use super::{Matrix, SVD, Eig, Triangular};
+use super::{Matrix, SVD, Eig, Triangular, Trans};
 use std::cmp::{min,max};
 use lapack::*;
 use matrixerror::MatrixError;
@@ -39,7 +39,7 @@ pub fn qr(a : &mut Matrix<f64>) ->Result<Matrix<f64>,MatrixError>{
             elements : a.elements.to_owned(),
             row_size : m,
             col_size : n,
-            transpose : false
+            transpose : Trans :: Regular,
         }),
         -1 => Err(MatrixError::LapackInputError),
         _ => Err(MatrixError::UnknownError)
@@ -74,7 +74,7 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
                 elements : u,
                 row_size : ldu,
                 col_size : min(m,n),
-                transpose : false,
+                transpose : Trans :: Regular,
             },
             Matrix :: diag_mat(s_elem)
             ,
@@ -82,7 +82,7 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
                 elements : vt,
                 row_size : ldvt,
                 col_size : n,
-                transpose : true,
+                transpose : Trans :: Transpose,
             }
         )
 
