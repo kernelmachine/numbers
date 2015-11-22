@@ -291,13 +291,13 @@ impl <T:Num + Clone + Rand> Matrix <T>{
     }
 
     // Check whether matrix is diagonalizable
-    pub fn diagonalizable() {
+    pub fn is_diagonalizable() -> bool {
         unimplemented!();
     }
 
 
     /// check whether matrix is hermitian/symmetric.
-    pub fn is_hermitian(){
+    pub fn is_hermitian() -> bool{
         unimplemented!();
     }
 

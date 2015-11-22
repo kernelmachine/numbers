@@ -93,7 +93,7 @@ pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 
 }
 
-
+/// Get the nullspace (kernel) of a matrix. (x where Ax = 0)
 pub fn nullspace(){
     unimplemented!();
 }

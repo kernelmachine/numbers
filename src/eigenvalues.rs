@@ -35,7 +35,7 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
 
 }
 
-// Get the eigenvalues of a hermitian matrix.
-pub fn eigsh(){
+/// Get the eigenvalues of a hermitian matrix.
+pub fn eigsh() -> Result<Matrix<f64>,MatrixError> {
     unimplemented!();
 }

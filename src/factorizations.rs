@@ -109,7 +109,7 @@ pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>
 }
 
 /// Compute the Cholesky Factorization.
-pub fn cholesky(){
+pub fn cholesky() {
     unimplemented!();
 }
 
