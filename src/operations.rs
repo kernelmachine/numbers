@@ -70,7 +70,7 @@ pub fn tril<T : Num + Clone + Rand>(a: &mut Matrix<T>, k: usize ) -> Result<Matr
 /// Invert a matrix via LU factorization.
 pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 
-    if let Ok((l, ipiv)) = lu (a){
+    if let Ok((l, ipiv)) = lufact (a){
         let n = l.col_size;
         let lda = l.row_size;
         let mut work = vec![0.0; 4 * n];
@@ -96,7 +96,7 @@ pub fn trace(a: &mut Matrix<f64> ) -> f64{
 
 }
 
-/// Get the product of the diagonal elements of a matrix. 
+/// Get the product of the diagonal elements of a matrix.
 pub fn prod_diag(a: &mut Matrix<f64> ) -> f64{
     let diag : Vec<f64> = a.diagonal();
     diag.iter().fold(0.0,|a,&b| a * b)
@@ -107,10 +107,10 @@ pub fn prod_diag(a: &mut Matrix<f64> ) -> f64{
 pub fn pseudoinverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
 
     if let Ok((mut u,mut e, mut vt)) = svd(a) {
-        let inv_e = matrix_map(&|x : &f64| if x > &0.0 { x.recip()} else { 0.0 },&mut e);
-        let d = dot(&mut u, &mut inv_e.ok().unwrap().transpose());
-        let m = dot (&mut d.ok().unwrap(), &mut vt);
-        return m
+        let inv_e = try!(matrix_map(&|x : &f64| if x > &0.0 { x.recip()} else { 0.0 },&mut e));
+        let mut d = try!(dot(&mut u, &mut inv_e.transpose()));
+        let m = try!(dot (&mut d, &mut vt));
+        return Ok(m)
     }
     Err(MatrixError::LapackComputationError)
 
@@ -128,7 +128,7 @@ pub fn is_unitary(a : &mut Matrix<f64> ) -> Result<bool, MatrixError>{
     }
 
     let mut at = a.transpose();
-    let d = dot (a, &mut at).ok().unwrap();
+    let d = try!(dot (a, &mut at));
     let l : Matrix <f64> = Matrix::identity(a.row_size);
     Ok(d == l)
 }
@@ -139,12 +139,15 @@ pub fn is_diagonalizable(a : &mut Matrix <f64>) -> Result<bool, MatrixError> {
         return Err(MatrixError::NonSquareMatrix)
     }
 
-    if is_normal(a).ok().unwrap(){ println!("normal"); Ok(true)}
+    if try!(is_normal(a)){
+        println!("normal");
+        Ok(true)
+    }
     else{
-        println!("{:?}",eigenvalues(a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap().elements);
+        let eigs = try!(eigenvalues(a, Eig::Eigenvalues, Triangular::Upper));
+        println!("{:?}",eigs.elements);
         println!("{:?}", a.row_size);
-
-        Ok(eigenvalues(a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap().elements.len() == a.row_size)
+        Ok(eigs.elements.len() == a.row_size)
     }
 }
 
@@ -155,8 +158,8 @@ pub fn is_normal(a : &mut Matrix<f64>) -> Result<bool, MatrixError> {
     }
     let mut at = a.transpose();
 
-    let inner = dot (a, &mut at).ok().unwrap();
-    let outer = dot (&mut at, a).ok().unwrap();
+    let inner = try!(dot (a, &mut at));
+    let outer = try!(dot (&mut at, a));
     println!("{:?}", inner);
     println!("{:?}", outer);
     Ok(inner==outer)
@@ -173,5 +176,4 @@ pub fn is_symmetric(a : &mut Matrix<f64>) -> Result<bool, MatrixError>{
     }
     let mut at = a.transpose();
     Ok(a == &mut at)
-
 }

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["cond","Determine the condition of a matrix via the condition number."],["norm","Calculate the norm of a matrix (1-Norm, Infinity-Norm, Frobenius Norm, or Max Absolute Value)"],["rank","Get the number of linearly independent rows or columns."]]});

@@ -1,8 +1,10 @@
 
 #[allow(dead_code)]
-
+#[macro_use(matrix_equal)]
 extern crate numbers;
 extern crate num;
+
+
 
 #[cfg(test)]
 mod tests{
@@ -14,6 +16,10 @@ mod tests{
     use numbers::rank::*;
     use num::traits::Float;
     use numbers::matrixerror::*;
+
+
+
+
     #[test]
     fn test_zeros() {
         let row_size = 2;
@@ -36,9 +42,7 @@ mod tests{
 
     #[test]
     fn test_transpose() {
-        let row_size = 2;
-        let column_size = 2;
-        if let Ok(mat) =  Matrix :: new(vec![1.0,2.0,3.0,4.0],row_size,column_size) {
+        if let Ok(mat) =  Matrix :: new(vec![1.0,2.0,3.0,4.0],2,2) {
             let mat_t = mat.transpose().transpose();
             assert_eq!(mat_t,mat)
         }
@@ -105,29 +109,21 @@ mod tests{
 
     #[test]
     fn test_lu_solve() {
-        let mat = &mut Matrix :: random(10,10);
-        if let Ok(w) = lu(mat){
-            let mut b =  Matrix :: random(10000,1);
-            let _l = lusolve(w, &mut b);
-            assert_eq!(1,1)
-        }
+        lusolve(&mut Matrix :: random(10,10), &mut Matrix :: random(10000,1));
+        // let mat = ;
+        // if let Ok(w) = lu(mat){
+        //     let mut b = ;
+        //     let _l = lusolve(w, &mut b);
+        //     assert_eq!(1,1)
+        // }
     }
 
     #[test]
-    fn test_lu(){
-        let  b = match  Matrix ::new(vec![4.0,3.0,8.0,6.01],2,2){
-            Ok(w) => Ok(w),
-            Err(_w) => Err(MatrixError::MalformedMatrix)
-        };
-        let mut c = b.ok().unwrap();
-
-        let mut _l = match lu(&mut c){
-            Ok(w) => Ok(w),
-            Err(_w) => Err(MatrixError::LapackComputationError)
-
-        };
-
-        assert_eq!(1,1)
+    fn test_lufact(){
+        if let Ok(mut c) = Matrix ::new(vec![4.0,3.0,8.0,8.0],2,2) {
+            let l = lufact(&mut c);
+            assert_eq!(1,1)
+        }
     }
     #[test]
     fn test_dot(){
@@ -143,61 +139,66 @@ mod tests{
     #[test]
     fn test_map(){
         let mut a : Matrix<f64>= Matrix ::random(10,10);
-        let v = matrix_map(&|&x| x+x, &mut a);
-        let e = matrix_map(&|&x| x*2.0, &mut a);
-        assert_eq!(e.ok(),v.ok());
+        if let Ok(v) = matrix_map(&|&x| x+x, &mut a){
+            if let Ok(e) = matrix_map(&|&x| x*2.0, &mut a){
+                matrix_equal!(e,v)
+            }
+        }
+
     }
 
 
     #[test]
     fn test_condition(){
-        let  b =  Matrix ::new(vec![500.0,50.0,100.0,100.0],2,2);
-        let mut c = b.ok().unwrap();
-        let rc =  cond(&mut c, Norm::InfinityNorm);
-        assert_eq!(rc.ok().unwrap(),Condition::WellConditioned)
+        if let Ok(mut b) =  Matrix ::new(vec![500.0,50.0,100.0,100.0],2,2) {
+            let rc =  cond(&mut b, Norm::InfinityNorm);
+            assert_eq!(rc.ok(),Some(Condition::WellConditioned))
+
+        }
     }
 
     #[test]
     fn test_inverse(){
-        let b = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 1.0,1.0,1.0,1.0,6.0],3,3);
-        let mut c = b.ok().unwrap();
-        if let Ok(_mat) = inverse(&mut c){
-            let b = Matrix :: new(vec![3.0, 1.0, 1.0, 1.0, 1.0,1.0,1.0,1.0,6.0],3,3);
-            let mut c = b.ok().unwrap();
-            if let Ok(_mat1) =  pseudoinverse(&mut c){
-                assert_eq!(1,1)
+        if let Ok(mut b) = Matrix :: new(vec![10.0,10.0,10.0,20.0], 2,2) {
+            if let Ok(mat) = inverse(&mut b){
+                if let Ok(mut c) = Matrix :: new(vec![10.0,10.0,10.0,20.0], 2,2){
+                    if let Ok(mat1) =  pseudoinverse(&mut c){
+                        matrix_equal!(mat, mat1)
+                    }
+                }
             }
         }
+
     }
 
 
     #[test]
     fn test_is_diagonalizable(){
-        let a = Matrix :: new(vec![-1.0,3.0,-1.0, -3.0,5.0,-1.0,-3.0,3.0,1.0],3,3);
-        assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap())
+        if let Ok(mut a) = Matrix :: new(vec![-1.0,3.0,-1.0, -3.0,5.0,-1.0,-3.0,3.0,1.0],3,3) {
+            if let Ok(d) = is_diagonalizable(&mut a){
+                assert!(d == true)
+            }
+        }
     }
+
     #[test]
-    #[should_panic]
     fn test_is_not_diagonalizable(){
-        let a = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3);
-        assert!(is_diagonalizable(&mut a.ok().unwrap()).ok().unwrap())
+        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3) {
+            if let Ok(d) = is_diagonalizable(&mut a){
+                assert!(d == false)
+            }
+        }
     }
 
     #[test]
     #[should_panic]
     fn test_rank(){
-        let a = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3);
-        assert!(rank(&mut a.ok().unwrap()).ok().unwrap() == 3)
-    }
+        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3) {
+            if let Ok(r) = rank(&mut a){
+                assert!(r == 3)
 
-    // #[test]
-    // fn test_pseudoinverse(){
-    //     let b = Matrix ::new(vec![4.0,5.0,1.0,2.0],2,2);
-    //     let mut c = b.ok().unwrap();
-    //     let rc =  pseudoinverse(&mut c);
-    //     // println!("{:?}",rc);
-    //
-    //     // assert_eq!(rc.ok().unwrap(),Condition::WellConditioned)
-    // }
+            }
+        }
+    }
 
 }

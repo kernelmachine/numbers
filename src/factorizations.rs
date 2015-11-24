@@ -6,7 +6,7 @@ use eigenvalues::*;
 use operations::*;
 
 /// Compute the LU factorization.
-pub fn lu(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
+pub fn lufact(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), MatrixError>{
     let m = a.row_size;
     let n = a.col_size;
     let mut ipiv = vec![0; min(m,n)];
@@ -99,9 +99,9 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
 /// Get the singular values of a matrix.
 pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError> {
         let mut at =  a.transpose();
-        let adjoint_operator = dot(&mut at,a);
-        let e = eigenvalues(&mut adjoint_operator.unwrap(), Eig :: Eigenvalues, Triangular::Upper);
-         match matrix_map(&|x : &f64| x.sqrt(), &mut e.unwrap()) {
+        let mut adjoint_operator = try!(dot(&mut at,a));
+        let mut e = try!(eigenvalues(&mut adjoint_operator, Eig :: Eigenvalues, Triangular::Upper));
+        match matrix_map(&|x : &f64| x.sqrt(), &mut e) {
                 Ok(mat) => Ok(mat),
                 Err(mat) => Err(mat),
          }

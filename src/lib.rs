@@ -81,6 +81,8 @@ pub enum Trans {
 /// Type declaration of Singular Value Decomposition Output
 pub type SVD = (Matrix<f64>, Matrix<f64>, Matrix<f64>);
 
+
+
 impl<'a, 'b, T : Num + Clone + Rand> Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Result<Matrix<T>, MatrixError>;
 
@@ -163,7 +165,23 @@ impl <T : Num + Clone + Rand> PartialEq for Matrix<T>{
    }
 }
 
+#[macro_export]
+macro_rules! matrix_equal {
+    ( $x:expr , $y : expr) => (
+        {
+            assert!($x.row_size == $y.row_size);
+            assert!($x.col_size == $y.col_size);
+            assert!($x.transpose  == $y.transpose);
+            if let Ok(s) = &$x - &$y{
+                for elem in s.elements{
+                    assert!(elem.abs() < 1e14)
+                }
+            }
+        }
 
+    )
+    }
+    
 impl <T:Num + Clone + Rand> Matrix <T>{
 
     /// Create a new matrix

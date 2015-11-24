@@ -7,6 +7,8 @@ use super::{Matrix,Norm, Condition};
 use matrixerror::MatrixError;
 use lapack::*;
 use factorizations::*;
+
+
 /// Calculate the norm of a matrix (1-Norm, Infinity-Norm, Frobenius Norm, or Max Absolute Value)
 pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
     let norm = match inorm {
@@ -44,7 +46,7 @@ pub fn cond(a : &mut Matrix <f64>, inorm : Norm) -> Result<Condition, MatrixErro
          Norm :: MaxAbsValue => return Err(MatrixError::LapackInputError)
     };
     let cond = Condition :: NA;
-    if let Ok((l, ipiv)) = lu (a){
+    if let Ok((l, ipiv)) = lufact (a){
         let n = l.col_size;
         let lda = l.row_size;
         let anorm = norm(&l, Norm::OneNorm);

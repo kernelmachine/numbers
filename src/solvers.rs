@@ -6,8 +6,8 @@ use matrixerror::MatrixError;
 
 
 /// Solve Ax = b via LU Factorization.
-pub fn lusolve(lu : (&mut Matrix<f64>, Vec<i32>), b : &mut Matrix<f64>) ->  Result<Matrix<f64>,MatrixError>{
-    let (a,ipiv) = lu;
+pub fn lusolve(a : &mut Matrix<f64>, b : &mut Matrix<f64>) ->  Result<Matrix<f64>,MatrixError>{
+    let (a,ipiv) = try!(lufact(a));
     let lda = a.row_size;
     let n = a.col_size;
     let ldb = b.row_size;

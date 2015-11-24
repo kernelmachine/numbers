@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["cholesky","Compute the Cholesky Factorization."],["hess","Compute the Hessenberg Factorization."],["lu","Compute the LU factorization."],["qr","Compute the QR Factorization."],["schur","Compute the Schur Factorization."],["singular_values","Get the singular values of a matrix."],["svd","Compute the SVD Factorization."]]});
