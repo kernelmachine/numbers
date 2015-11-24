@@ -24,14 +24,14 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
     dsyev(e, t, n, &mut a.elements, n, &mut w, &mut work, lwork, &mut info);
 
     match info {
-        1 => Err(MatrixError::LapackComputationError),
+        x if x > 0 => Err(MatrixError::LapackComputationError),
         0 => Ok (Matrix {
             elements : w.to_owned(),
             row_size : w.len(),
             col_size : 1,
             transpose : Trans :: Regular,
         }),
-        -1 => Err(MatrixError::LapackInputError),
+        x if x < 0 => Err(MatrixError::LapackInputError),
         _ => Err(MatrixError::UnknownError)
     }
 

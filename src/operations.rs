@@ -5,6 +5,8 @@ use num::traits::Num;
 use rand :: Rand;
 use matrixerror::MatrixError;
 use factorizations::*;
+
+
 /// Compute dot product between two matrices.
 pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>{
         if a.col_size != b.row_size {
@@ -68,9 +70,9 @@ pub fn inverse(a : &mut Matrix<f64> ) ->Result<Matrix<f64>,MatrixError> {
         let mut info = 0;
         dgetri(n, &mut l.elements, lda, &ipiv,&mut work, iwork, &mut info);
         match info {
-            1 => return Err(MatrixError::LapackComputationError),
+            x if x > 0 => return Err(MatrixError::LapackComputationError),
             0 => { let m = Ok(l.to_owned()); return m}
-            -1 => return  Err(MatrixError::LapackInputError),
+            x if x < 0 => return  Err(MatrixError::LapackInputError),
             _ => return Err(MatrixError::UnknownError),
         };
 
@@ -132,8 +134,7 @@ pub fn is_normal(a : &mut Matrix<f64>) -> Result<bool, MatrixError> {
 
     let inner = try!(dot (a, &mut at));
     let outer = try!(dot (&mut at, a));
-    println!("{:?}", inner);
-    println!("{:?}", outer);
+
     Ok(inner==outer)
 
 }

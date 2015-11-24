@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["lufact","Compute the LU factorization."],["qr","Compute the QR Factorization."],["singular_values","Get the singular values of a matrix."],["svd","Compute the SVD Factorization."]]});

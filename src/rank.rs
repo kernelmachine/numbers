@@ -26,12 +26,13 @@ pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
 
 }
 
-/// Get the number of linearly independent rows or columns.
+/// Get the number of linearly independent rows or columns. TODO: use QR
 pub fn rank(a : &mut Matrix<f64>) -> Result<usize, MatrixError> {
 
     if let Ok(mut s) = singular_values(a) {
         let z = &mut s.elements;
-        return Ok(z.iter().take_while(|x| *x > &0.0).collect::<Vec<&f64>>().len())
+        println!("{:?}",z);
+        return Ok(z.iter().filter(|x| *x > &0.0).collect::<Vec<&f64>>().len())
     }
     Ok(0 as usize)
 
@@ -45,7 +46,7 @@ pub fn cond(a : &mut Matrix <f64>, inorm : Norm) -> Result<Condition, MatrixErro
          Norm :: FrobeniusNorm => return Err(MatrixError::LapackInputError),
          Norm :: MaxAbsValue => return Err(MatrixError::LapackInputError)
     };
-    let cond = Condition :: NA;
+    let cond = Condition :: NotAvailable;
     if let Ok((l, ipiv)) = lufact (a){
         let n = l.col_size;
         let lda = l.row_size;
@@ -67,9 +68,9 @@ pub fn cond(a : &mut Matrix <f64>, inorm : Norm) -> Result<Condition, MatrixErro
         };
 
         match info {
-            1 => return Err(MatrixError::LapackComputationError),
+            x if x > 0 => return Err(MatrixError::LapackComputationError),
             0 => return Ok(cond),
-            -1 => return  Err(MatrixError::LapackInputError),
+            x if x < 0 => return  Err(MatrixError::LapackInputError),
             _ => return Err(MatrixError::UnknownError),
         };
 

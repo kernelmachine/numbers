@@ -174,11 +174,11 @@ mod tests{
 
 
     #[test]
-    #[should_panic]
     fn test_rank(){
-        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3) {
+        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,2.0,2.0,4.0,4.0],2,3) {
             if let Ok(r) = rank(&mut a){
-                assert!(r == 3)
+                println!("{:?}", r);
+                assert!(r == 1)
 
             }
         }

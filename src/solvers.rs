@@ -13,17 +13,18 @@ pub fn lusolve(a : &mut Matrix<f64>, b : &mut Matrix<f64>) ->  Result<Matrix<f64
     let ldb = b.row_size;
     let nrhs = b.col_size;
     let mut info = 0;
+    
     dgetrs(b'N', n, nrhs, &a.elements, lda, &ipiv, &mut b.elements, ldb , &mut info);
 
     match info {
-        1 => Err(MatrixError::LapackComputationError),
+        x if x > 0 => Err(MatrixError::LapackComputationError),
         0 => Ok(Matrix {
             elements : b.elements.to_owned(),
             row_size : ldb,
             col_size : nrhs,
             transpose : Trans :: Regular,
         }),
-        -1 => Err(MatrixError::LapackInputError),
+        x if x < 0 => Err(MatrixError::LapackInputError),
         _ => Err(MatrixError::UnknownError)
     }
 

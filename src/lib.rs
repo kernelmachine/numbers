@@ -69,10 +69,11 @@ pub enum Condition {
     WellConditioned,
     IllConditioned,
     Singular,
-    NA
+    NotAvailable
 }
 
-#[derive(Debug, Clone, PartialEq)]
+/// Trans enumerates transpose/non-transpose matrices
+#[derive(Debug, Clone , PartialEq)]
 pub enum Trans {
     Transpose,
     Regular

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["eigenvalues","Get the eigenvalues of a matrix."]]});

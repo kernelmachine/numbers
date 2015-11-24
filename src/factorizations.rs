@@ -1,4 +1,4 @@
-use super::{Matrix, SVD, Eig, Triangular, Trans};
+use super::{Matrix, Eig, SVD, Triangular, Trans};
 use std::cmp::{min,max};
 use lapack::*;
 use matrixerror::MatrixError;
@@ -13,9 +13,9 @@ pub fn lufact(a : &mut Matrix<f64>) -> Result<(&mut Matrix<f64>, Vec<i32>), Matr
     let mut info = 0;
     dgetrf(m, n, &mut a.elements, m, &mut ipiv, &mut info);
     match info {
-        1 => Err(MatrixError::LapackComputationError),
+        x if x > 0 => Err(MatrixError::LapackComputationError),
         0 => Ok((a, ipiv)),
-        -1 => Err(MatrixError::LapackInputError),
+        x if x < 0 => Err(MatrixError::LapackInputError),
         _ => Err(MatrixError::UnknownError)
     }
 
@@ -34,14 +34,14 @@ pub fn qr(a : &mut Matrix<f64>) ->Result<Matrix<f64>,MatrixError>{
     dgeqrf(m, n, &mut a.elements, m, &mut tau,
     &mut work, lwork, &mut info);
     match info {
-        1 => Err(MatrixError::LapackComputationError),
+        x if x > 0 => Err(MatrixError::LapackComputationError),
         0 => Ok(Matrix {
             elements : a.elements.to_owned(),
             row_size : m,
             col_size : n,
             transpose : Trans :: Regular,
         }),
-        -1 => Err(MatrixError::LapackInputError),
+        x if x < 0 => Err(MatrixError::LapackInputError),
         _ => Err(MatrixError::UnknownError)
     }
 }
@@ -66,7 +66,7 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
         dgesvd(b'S', b'S',m,n,&mut a.elements,lda,&mut s.elements, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
 
         match info {
-            1 => return Err(MatrixError::LapackComputationError),
+            x if x > 0 => return Err(MatrixError::LapackComputationError),
             0 => return Ok((
                 Matrix {
                     elements : u,
@@ -84,7 +84,7 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
             )
 
     ),
-            -1 => return Err(MatrixError::LapackInputError),
+            x if x < 0 => return Err(MatrixError::LapackInputError),
             _ => return Err(MatrixError::UnknownError)
         }
 
@@ -100,9 +100,6 @@ pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>
         let mut at =  a.transpose();
         let mut adjoint_operator = try!(dot(&mut at,a));
         let mut e = try!(eigenvalues(&mut adjoint_operator, Eig :: Eigenvalues, Triangular::Upper));
-        match matrix_map(&|x : &f64| x.sqrt(), &mut e) {
-                Ok(mat) => Ok(mat),
-                Err(mat) => Err(mat),
-         }
-
+        let s = try!(matrix_map(&|x : &f64| x.sqrt(), &mut e));
+        Ok(s)
 }
