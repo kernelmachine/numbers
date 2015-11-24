@@ -1,11 +1,10 @@
-use super::{Matrix,Triangular, Eig, Trans};
+use super::{Matrix,Triangular, Trans};
 use blas::*;
 use lapack::dgetri;
 use num::traits::Num;
 use rand :: Rand;
 use matrixerror::MatrixError;
 use factorizations::*;
-use eigenvalues::*;
 /// Compute dot product between two matrices.
 pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>{
         if a.col_size != b.row_size {
@@ -35,15 +34,6 @@ pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, M
         })
 }
 
-/// Compute kronecker product between two matrices.
-pub fn kronecker(){
-    unimplemented!();
-}
-
-/// Compute cross product between two matrices.
-pub fn cross() {
-    unimplemented!()
-}
 
 /// Map a function to all elements of matrix.
 pub fn matrix_map <T: Num + Clone + Rand> (func : &Fn(&T) -> T, a : &mut Matrix<T>) -> Result<Matrix<T>, MatrixError>{
@@ -131,24 +121,6 @@ pub fn is_unitary(a : &mut Matrix<f64> ) -> Result<bool, MatrixError>{
     let d = try!(dot (a, &mut at));
     let l : Matrix <f64> = Matrix::identity(a.row_size);
     Ok(d == l)
-}
-
-/// Check whether a matrix is diagonalizable
-pub fn is_diagonalizable(a : &mut Matrix <f64>) -> Result<bool, MatrixError> {
-    if a.row_size != a.col_size {
-        return Err(MatrixError::NonSquareMatrix)
-    }
-
-    if try!(is_normal(a)){
-        println!("normal");
-        Ok(true)
-    }
-    else{
-        let eigs = try!(eigenvalues(a, Eig::Eigenvalues, Triangular::Upper));
-        println!("{:?}",eigs.elements);
-        println!("{:?}", a.row_size);
-        Ok(eigs.elements.len() == a.row_size)
-    }
 }
 
 /// Check whether a matrix is normal. A^T A = A A ^ T

@@ -64,33 +64,35 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
     let mut work = vec![0.0; lwork];
 
     let mut info = 0;
-    let mut s_elem = s.unwrap().elements;
-    dgesvd(b'S', b'S',m,n,&mut a.elements,lda,&mut s_elem, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
+    if let Ok(mut s) = singular_values(a){
+        dgesvd(b'S', b'S',m,n,&mut a.elements,lda,&mut s.elements, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
 
-    match info {
-        1 => Err(MatrixError::LapackComputationError),
-        0 => Ok((
-            Matrix {
-                elements : u,
-                row_size : ldu,
-                col_size : min(m,n),
-                transpose : Trans :: Regular,
-            },
-            Matrix :: diag_mat(s_elem)
-            ,
-            Matrix {
-                elements : vt,
-                row_size : ldvt,
-                col_size : n,
-                transpose : Trans :: Transpose,
+            match info {
+                1 => return Err(MatrixError::LapackComputationError),
+                0 => return Ok((
+                    Matrix {
+                        elements : u,
+                        row_size : ldu,
+                        col_size : min(m,n),
+                        transpose : Trans :: Regular,
+                    },
+                    Matrix :: diag_mat(s.elements)
+                    ,
+                    Matrix {
+                        elements : vt,
+                        row_size : ldvt,
+                        col_size : n,
+                        transpose : Trans :: Transpose,
+                    }
+                )
+
+        ),
+                -1 => return Err(MatrixError::LapackInputError),
+                _ => return Err(MatrixError::UnknownError)
             }
-        )
 
-),
-        -1 => Err(MatrixError::LapackInputError),
-        _ => Err(MatrixError::UnknownError)
     }
-
+    Err(MatrixError::LapackComputationError)
 
 
 }
@@ -105,23 +107,5 @@ pub fn singular_values(a : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>
                 Ok(mat) => Ok(mat),
                 Err(mat) => Err(mat),
          }
-
-}
-
-/// Compute the Cholesky Factorization.
-pub fn cholesky() {
-    unimplemented!();
-}
-
-/// Compute the Hessenberg Factorization.
-pub fn hess(){
-    unimplemented!();
-
-
-}
-
-/// Compute the Schur Factorization.
-pub fn schur(){
-    unimplemented!();
 
 }
