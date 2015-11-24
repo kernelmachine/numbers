@@ -172,23 +172,6 @@ mod tests{
     }
 
 
-    #[test]
-    fn test_is_diagonalizable(){
-        if let Ok(mut a) = Matrix :: new(vec![-1.0,3.0,-1.0, -3.0,5.0,-1.0,-3.0,3.0,1.0],3,3) {
-            if let Ok(d) = is_diagonalizable(&mut a){
-                assert!(d == true)
-            }
-        }
-    }
-
-    #[test]
-    fn test_is_not_diagonalizable(){
-        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,0.0, 0.0,1.0,1.0,0.0,0.0,4.0],3,3) {
-            if let Ok(d) = is_diagonalizable(&mut a){
-                assert!(d == false)
-            }
-        }
-    }
 
     #[test]
     #[should_panic]
