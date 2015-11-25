@@ -55,7 +55,7 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
     let ldu = a.row_size;
     let ldvt = a.col_size;
 
-    let mut u = vec![0.0; ldu*min(m,n)];
+    let mut u = vec![0.0; ldu*m];
     let mut vt = vec![0.0;ldvt*n];
 
     let lwork = max(max(1,3*min(m,n)+min(m,n)),5*min(m,n)) +10 ;
@@ -63,7 +63,8 @@ pub fn svd(a : &mut Matrix<f64>) -> Result <SVD, MatrixError> {
     let mut info = 0;
 
     if let Ok(mut s) = singular_values(a){
-        dgesvd(b'S', b'S',m,n,&mut a.elements,lda,&mut s.elements, &mut u,ldu, &mut vt, ldvt, &mut work, lwork as isize, &mut info);
+        dgesvd(b'A', b'A',m,n,&mut a.elements,lda,&mut s.elements, &mut vt,ldu, &mut u,
+        ldvt, &mut work, lwork as isize, &mut info);
 
         match info {
             x if x > 0 => return Err(MatrixError::LapackComputationError),

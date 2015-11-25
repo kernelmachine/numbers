@@ -68,9 +68,24 @@ mod tests{
 
     #[test]
     fn test_svd() {
-        let mut mat = Matrix ::random(10,10);
-        let _w = svd(&mut mat);
-        assert_eq!(1,1);
+        if let Ok(mut mat) = Matrix :: new(vec![1.0,1.0,2.0,2.0,4.0,4.0, 8.0,8.0, 10.0,10.0],2,5){
+        if let Ok((mut u, mut e, mut v)) = svd(&mut mat){
+            println!("{:?}", u);
+            println!("{:?}", e);
+            if let Ok(mut ue) = dot(&mut u,&mut e){
+                if let Ok(uev) = dot(&mut ue,&mut v){
+                    println!("{:?}", uev);
+                    println!("{:?}", mat);
+                    return matrix_equal!(uev,mat)
+                }
+                panic!("uh")
+            }
+            panic!("yes")
+        }
+
+panic!("poop")
+    }
+    panic!("something went wrong")
     }
 
     #[test]
@@ -110,12 +125,6 @@ mod tests{
     #[test]
     fn test_lu_solve() {
         lusolve(&mut Matrix :: random(10,10), &mut Matrix :: random(10000,1));
-        // let mat = ;
-        // if let Ok(w) = lu(mat){
-        //     let mut b = ;
-        //     let _l = lusolve(w, &mut b);
-        //     assert_eq!(1,1)
-        // }
     }
 
     #[test]
@@ -175,7 +184,7 @@ mod tests{
 
     #[test]
     fn test_rank(){
-        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,2.0,2.0,4.0,4.0],2,3) {
+        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,2.0,2.0,4.0,4.0, 8.0,8.0, 10.0,10.0],2,5) {
             if let Ok(r) = rank(&mut a){
                 println!("{:?}", r);
                 assert!(r == 1)
@@ -183,5 +192,38 @@ mod tests{
             }
         }
     }
+
+    #[test]
+    fn test_orthogonal(){
+        if let Ok(mut a) = Matrix :: new(vec![0.333333333,-0.6666666,0.6666666,0.666666666,-0.3333333, -0.6666666, 0.666666, -0.666666,0.3333333],3,3) {
+            if let Ok(mut l) = is_orthogonal(&mut a) {
+                assert_eq!(l, true)
+
+            }
+        }
+    }
+
+    #[test]
+    fn test_normal(){
+        if let Ok(mut a) = Matrix :: new(vec![1.0,1.0,0.0,0.0,1.0,1.0,1.0,0.0,1.0],3,3) {
+            if let Ok(mut l) = is_normal(&mut a) {
+                assert_eq!(l, true)
+
+            }
+        }
+    }
+
+    #[test]
+    fn test_symmetric(){
+        if let Ok(mut a) = Matrix :: new(vec![4.0,5.0,5.0,4.0],2,2) {
+            if let Ok(mut l) = is_symmetric(&mut a) {
+                assert_eq!(l, true)
+
+            }
+        }
+    }
+
+
+
 
 }

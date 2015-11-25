@@ -32,7 +32,7 @@ pub fn rank(a : &mut Matrix<f64>) -> Result<usize, MatrixError> {
     if let Ok(mut s) = singular_values(a) {
         let z = &mut s.elements;
         println!("{:?}",z);
-        return Ok(z.iter().filter(|x| *x > &0.0).collect::<Vec<&f64>>().len())
+        return Ok(z.iter().filter(|x| *x > &1e-4).collect::<Vec<&f64>>().len())
     }
     Ok(0 as usize)
 

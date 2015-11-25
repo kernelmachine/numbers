@@ -7,6 +7,28 @@ use matrixerror::MatrixError;
 use factorizations::*;
 
 
+
+#[macro_export]
+macro_rules! matrix_equal {
+    ( $x:expr , $y : expr) => (
+        {
+            assert!($x.row_size == $y.row_size);
+            assert!($x.col_size == $y.col_size);
+            assert!($x.transpose  == $y.transpose);
+            if let Ok(s) = &$x - &$y{
+                for elem in s.elements{
+                    assert!(elem.abs() < 1e14)
+                };
+                return Ok(true)
+            }
+            Ok(false)
+        }
+
+    )
+    }
+
+
+
 /// Compute dot product between two matrices.
 pub fn dot (a : &mut Matrix<f64>, b : &mut Matrix<f64>) -> Result<Matrix<f64>, MatrixError>{
         if a.col_size != b.row_size {
@@ -114,7 +136,7 @@ pub fn nullspace(){
 }
 
 /// Check whether a matrix is unitary. A^T A = I
-pub fn is_unitary(a : &mut Matrix<f64> ) -> Result<bool, MatrixError>{
+pub fn is_orthogonal(a : &mut Matrix<f64> ) -> Result<bool, MatrixError>{
     if a.row_size != a.col_size {
         return Err(MatrixError::NonSquareMatrix)
     }
@@ -122,7 +144,7 @@ pub fn is_unitary(a : &mut Matrix<f64> ) -> Result<bool, MatrixError>{
     let mut at = a.transpose();
     let d = try!(dot (a, &mut at));
     let l : Matrix <f64> = Matrix::identity(a.row_size);
-    Ok(d == l)
+    matrix_equal!(d,l)
 }
 
 /// Check whether a matrix is normal. A^T A = A A ^ T
@@ -135,7 +157,7 @@ pub fn is_normal(a : &mut Matrix<f64>) -> Result<bool, MatrixError> {
     let inner = try!(dot (a, &mut at));
     let outer = try!(dot (&mut at, a));
 
-    Ok(inner==outer)
+    matrix_equal!(inner,outer)
 
 }
 
@@ -148,5 +170,9 @@ pub fn is_symmetric(a : &mut Matrix<f64>) -> Result<bool, MatrixError>{
         return Err(MatrixError::NonSquareMatrix)
     }
     let mut at = a.transpose();
-    Ok(a == &mut at)
+    let a_row = a.row_size;
+    let at_row = at.row_size;
+    let at_dot = try!(dot(&mut at, &mut Matrix::identity(at_row)));
+    let a_dot = try!(dot(a, &mut Matrix::identity(a_row)));
+    matrix_equal!(at_dot,a_dot)
 }

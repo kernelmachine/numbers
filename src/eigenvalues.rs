@@ -36,3 +36,7 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
     }
 
 }
+
+pub fn eig_sh() {
+    unimplemented!()
+}
