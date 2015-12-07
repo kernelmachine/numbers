@@ -45,14 +45,14 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-49' class='srclink' href='../../src/numbers/operations.rs.html#1-152' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-49' class='srclink' href='../../src/numbers/operations.rs.html#1-340' title='goto source code'>[src]</a></span></h1>
 <h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='fn' href='fn.dot.html'
                                title='numbers::operations::dot'>dot</a></td>
                         <td class='docblock short'>
-                             <p>Compute dot product between two matrices.</p>
+                             <p>Compute the dot product between two matrices.</p>
 
                         </td>
                     </tr>
@@ -61,7 +61,7 @@
                         <td><a class='fn' href='fn.inverse.html'
                                title='numbers::operations::inverse'>inverse</a></td>
                         <td class='docblock short'>
-                             <p>Invert a matrix via LU factorization.</p>
+                             <p>Invert a square, non-singular matrix via LU factorization.</p>
 
                         </td>
                     </tr>
@@ -70,7 +70,16 @@
                         <td><a class='fn' href='fn.is_normal.html'
                                title='numbers::operations::is_normal'>is_normal</a></td>
                         <td class='docblock short'>
-                             <p>Check whether a matrix is normal. A<sup>T</sup> A = A A ^ T</p>
+                             <p>Check whether a matrix is normal, ie that A<sup>T</sup> A = A A<sup>T.</sup></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.is_orthogonal.html'
+                               title='numbers::operations::is_orthogonal'>is_orthogonal</a></td>
+                        <td class='docblock short'>
+                             <p>Check whether a matrix is orthogonal, ie that A<sup>T</sup> A = I.</p>
 
                         </td>
                     </tr>
@@ -79,16 +88,7 @@
                         <td><a class='fn' href='fn.is_symmetric.html'
                                title='numbers::operations::is_symmetric'>is_symmetric</a></td>
                         <td class='docblock short'>
-                             <p>Check whether a matrix is symmetric. A<sup>T</sup> == A.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.is_unitary.html'
-                               title='numbers::operations::is_unitary'>is_unitary</a></td>
-                        <td class='docblock short'>
-                             <p>Check whether a matrix is unitary. A<sup>T</sup> A = I</p>
+                             <p>Check whether a matrix is symmetric, ie that A<sup>T</sup> = A.</p>
 
                         </td>
                     </tr>
@@ -97,16 +97,7 @@
                         <td><a class='fn' href='fn.matrix_map.html'
                                title='numbers::operations::matrix_map'>matrix_map</a></td>
                         <td class='docblock short'>
-                             <p>Map a function to all elements of matrix.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.nullspace.html'
-                               title='numbers::operations::nullspace'>nullspace</a></td>
-                        <td class='docblock short'>
-                             <p>Get the nullspace (kernel) of a matrix. (x where Ax = 0)</p>
+                             <p>Map a function to all elements of a matrix.</p>
 
                         </td>
                     </tr>
@@ -142,7 +133,7 @@
                         <td><a class='fn' href='fn.tril.html'
                                title='numbers::operations::tril'>tril</a></td>
                         <td class='docblock short'>
-                             <p>Get lower triangular matrix</p>
+                             <p>Get the lower triangular matrix</p>
 
                         </td>
                     </tr>
@@ -151,7 +142,7 @@
                         <td><a class='fn' href='fn.triu.html'
                                title='numbers::operations::triu'>triu</a></td>
                         <td class='docblock short'>
-                             <p>Get upper triangular matrix</p>
+                             <p>Get the upper triangular matrix.</p>
 
                         </td>
                     </tr>

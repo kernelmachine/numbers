@@ -78,6 +78,22 @@
 <span id="36">36</span>
 <span id="37">37</span>
 <span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Matrix</span>, <span class='ident'>Eig</span>, <span class='ident'>Triangular</span>, <span class='ident'>Trans</span>};
 <span class='kw'>use</span> <span class='ident'>lapack</span>::<span class='op'>*</span>;
@@ -85,7 +101,23 @@
 
 
 
-<span class='doccomment'>/// Get the eigenvalues of a matrix.</span>
+<span class='doccomment'>/// Get the eigenvalues of a general matrix.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Arguments</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// * `Matrix` - Matrix of type f64</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>///#[macro_use] extern crate numbers;</span>
+<span class='doccomment'>///use numbers::{Matrix, Eig, Triangular};</span>
+<span class='doccomment'>/// pub fn main(){</span>
+<span class='doccomment'>/// let mut a = Matrix::new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3,3).ok().unwrap();</span>
+<span class='doccomment'>/// let eigs = numbers::eigenvalues::eigenvalues(&amp;mut a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap();</span>
+<span class='doccomment'>/// let ans = Matrix::new(vec![2.0, 2.0, 5.0], 3,1).ok().unwrap();</span>
+<span class='doccomment'>/// matrix_equal!(eigs,ans)</span>
+<span class='doccomment'>///}</span>
+<span class='doccomment'>///```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>eigenvalues</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>eorv</span> : <span class='ident'>Eig</span>, <span class='ident'>tri</span> : <span class='ident'>Triangular</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
     <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>col_size</span>;
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>w</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0.0</span>; <span class='ident'>n</span>];

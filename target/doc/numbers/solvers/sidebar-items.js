@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cholsolve","Solve Ax = b via Cholesky decomposition."],["linearsolve","Solve Ax = b via least squares error solution."],["lusolve","Solve Ax = b via LU Factorization."],["svdsolve","Solve Ax = b via SVD."]]});
+initSidebarItems({"fn":[["lusolve","Solve Ax = b via LU Factorization."]]});

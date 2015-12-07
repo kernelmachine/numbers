@@ -95,8 +95,24 @@
 <span class='kw'>use</span> <span class='ident'>matrixerror</span>::<span class='ident'>MatrixError</span>;
 
 
-
 <span class='doccomment'>/// Solve Ax = b via LU Factorization.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Arguments</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// * `Matrix` - Matrix of type f64</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>///#[macro_use] extern crate numbers;</span>
+<span class='doccomment'>///use numbers::Matrix;</span>
+<span class='doccomment'>/// pub fn main(){</span>
+<span class='doccomment'>/// let mut a = Matrix::new(vec![5.0, -1.0, 2.0, 10.0, 3.0, 7.0, 15.0, 17.0,19.0], 3,3).ok().unwrap();</span>
+<span class='doccomment'>/// let mut b = Matrix::new(vec![4.0,19.0,-6.0],3,1).ok().unwrap();</span>
+<span class='doccomment'>/// let mut x = numbers::solvers::lusolve(&amp;mut a,&amp;mut b).ok().unwrap();</span>
+<span class='doccomment'>/// let ans = numbers::operations::dot(&amp;mut a, &amp;mut x).ok().unwrap();</span>
+<span class='doccomment'>/// matrix_equal!(ans,b)</span>
+<span class='doccomment'>///}</span>
+<span class='doccomment'>///```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lusolve</span>(<span class='ident'>a</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>, <span class='ident'>b</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span>  <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>,<span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
     <span class='kw'>let</span> (<span class='ident'>a</span>,<span class='ident'>ipiv</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>lufact</span>(<span class='ident'>a</span>));
     <span class='kw'>let</span> <span class='ident'>lda</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>row_size</span>;
@@ -104,7 +120,7 @@
     <span class='kw'>let</span> <span class='ident'>ldb</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>row_size</span>;
     <span class='kw'>let</span> <span class='ident'>nrhs</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>col_size</span>;
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>info</span> <span class='op'>=</span> <span class='number'>0</span>;
-    
+
     <span class='ident'>dgetrs</span>(<span class='string'>b&#39;N&#39;</span>, <span class='ident'>n</span>, <span class='ident'>nrhs</span>, <span class='kw-2'>&amp;</span><span class='ident'>a</span>.<span class='ident'>elements</span>, <span class='ident'>lda</span>, <span class='kw-2'>&amp;</span><span class='ident'>ipiv</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>b</span>.<span class='ident'>elements</span>, <span class='ident'>ldb</span> , <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>info</span>);
 
     <span class='kw'>match</span> <span class='ident'>info</span> {
@@ -120,22 +136,6 @@
     }
 
 
-}
-
-<span class='doccomment'>/// Solve Ax = b via least squares error solution.</span>
-
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>linearsolve</span>(){
-    <span class='macro'>unimplemented</span><span class='macro'>!</span>();
-}
-
-<span class='doccomment'>/// Solve Ax = b via SVD.</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>svdsolve</span>(){
-    <span class='macro'>unimplemented</span><span class='macro'>!</span>();
-}
-
-<span class='doccomment'>/// Solve Ax = b via Cholesky decomposition.</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cholsolve</span>(){
-    <span class='macro'>unimplemented</span><span class='macro'>!</span>();
 }
 </pre>
 </section>

@@ -45,8 +45,23 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-264' class='srclink' href='../../src/numbers/rank.rs.html#42-79' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-277' class='srclink' href='../../src/numbers/rank.rs.html#85-122' title='goto source code'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn cond(a: &amp;mut <a class='struct' href='../../numbers/struct.Matrix.html' title='numbers::Matrix'>Matrix</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>&gt;, inorm: <a class='enum' href='../../numbers/enum.Norm.html' title='numbers::Norm'>Norm</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../../numbers/enum.Condition.html' title='numbers::Condition'>Condition</a>, <a class='enum' href='../../numbers/matrixerror/enum.MatrixError.html' title='numbers::matrixerror::MatrixError'>MatrixError</a>&gt;</pre><div class='docblock'><p>Determine the condition of a matrix via the condition number.</p>
+
+<p># Arguments</p>
+
+<ul>
+<li><p><code>Matrix</code> - Matrix of type f64</p>
+
+<h1 id='example' class='section-header'><a href='#example'>Example</a></h1><pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>numbers</span>;
+<span class='kw'>use</span> <span class='ident'>numbers</span>::{<span class='ident'>Matrix</span>, <span class='ident'>Norm</span>, <span class='ident'>Condition</span>};
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>main</span>(){
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>Matrix</span>::<span class='ident'>new</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>5.0</span>,<span class='number'>10.0</span>,<span class='number'>1.0</span>,<span class='number'>2.01</span>], <span class='number'>2</span>,<span class='number'>2</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>numbers</span>::<span class='ident'>rank</span>::<span class='ident'>cond</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>a</span>, <span class='ident'>Norm</span> :: <span class='ident'>InfinityNorm</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='ident'>Condition</span>::<span class='ident'>IllConditioned</span>)
+}</pre></li>
+</ul>
 </div></section>
     <section id='search' class="content hidden"></section>
 

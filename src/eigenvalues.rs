@@ -1,11 +1,27 @@
-use super::{Matrix, Eig, Triangular, Trans};
+use super::{Matrix, Eig, Triangular, Trans, RectMat};
 use lapack::*;
 use matrixerror::MatrixError;
 
 
 
-/// Get the eigenvalues of a matrix.
-pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result<Matrix<f64>,MatrixError>{
+/// Get the eigenvalues of a general matrix.
+///
+/// # Arguments
+///
+/// * `Matrix` - Matrix of type f64
+///
+/// # Example
+/// ```
+///#[macro_use] extern crate numbers;
+///use numbers::{Matrix, Eig, Triangular};
+/// pub fn main(){
+/// let mut a = Matrix::new(vec![3.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 3.0], 3,3).ok().unwrap();
+/// let eigs = numbers::eigenvalues::eigenvalues(&mut a, Eig::Eigenvalues, Triangular::Upper).ok().unwrap();
+/// let ans = Matrix::new(vec![2.0, 2.0, 5.0], 3,1).ok().unwrap();
+/// matrix_equal!(eigs,ans)
+///}
+///```
+pub fn eigenvalues <T: RectMat> (a : &mut T, eorv : Eig, tri : Triangular) -> Result<T,MatrixError>{
     let n = a.col_size;
     let mut w = vec![0.0; n];
     let mut work = vec![0.0; 4 * n];
@@ -35,8 +51,4 @@ pub fn eigenvalues(a : &mut Matrix<f64>, eorv : Eig, tri : Triangular) -> Result
         _ => Err(MatrixError::UnknownError)
     }
 
-}
-
-pub fn eig_sh() {
-    unimplemented!()
 }

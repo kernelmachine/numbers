@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["eigenvalues","Get the eigenvalues of a matrix."]]});
+initSidebarItems({"fn":[["eigenvalues","Get the eigenvalues of a general matrix."]]});

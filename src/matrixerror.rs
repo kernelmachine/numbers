@@ -10,7 +10,8 @@ pub enum MatrixError{
     SingularMatrix,
     LapackComputationError,
     LapackInputError,
-    UnknownError
+    UnknownError,
+    IndexError
 }
 
 impl fmt::Display for MatrixError{
@@ -24,6 +25,7 @@ impl fmt::Display for MatrixError{
             MatrixError::SingularMatrix => write!(f, "Operation cannot be performed. Matrix has zero determinant."),
             MatrixError::LapackComputationError => write!(f, "Failure in the course of computation."),
             MatrixError::LapackInputError => write!(f, "Illegal argument detected."),
+            MatrixError::IndexError => write!(f, "Indexed outside of matrix bounds."),
             MatrixError::UnknownError => write!(f,"Unknown error, please submit bug.")
         }
     }
@@ -40,6 +42,7 @@ impl error::Error for MatrixError{
             MatrixError::SingularMatrix => "Operation cannot be performed. Matrix has zero determinant.",
             MatrixError::LapackComputationError => "Failure in the course of computation.",
             MatrixError::LapackInputError => "Illegal argument detected.",
+            MatrixError::IndexError => "Indexed outside of matrix bounds.",
             MatrixError::UnknownError => "Unknown error, please submit bug."
         }
 
@@ -53,6 +56,7 @@ impl error::Error for MatrixError{
           MatrixError::SingularMatrix => None,
           MatrixError::LapackComputationError => None,
           MatrixError::LapackInputError => None,
+          MatrixError::IndexError => None,
           MatrixError::UnknownError => None
       }
   }

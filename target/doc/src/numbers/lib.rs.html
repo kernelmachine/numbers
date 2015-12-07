@@ -350,6 +350,8 @@
 <span id="308">308</span>
 <span id="309">309</span>
 <span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Numbers provides safe, modular, and fast high-dimensional matrix computations.</span>
 
@@ -538,7 +540,7 @@
 
 <span class='kw'>impl</span> <span class='op'>&lt;</span><span class='ident'>T</span>:<span class='ident'>Num</span> <span class='op'>+</span> <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Rand</span><span class='op'>&gt;</span> <span class='ident'>Matrix</span> <span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
 
-    <span class='doccomment'>/// Create a new matrix</span>
+    <span class='doccomment'>/// Create a rectangular matrix.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>e</span> : <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>r_size</span> : <span class='ident'>usize</span>, <span class='ident'>c_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>MatrixError</span><span class='op'>&gt;</span>{
         <span class='kw'>if</span> <span class='ident'>r_size</span> <span class='op'>*</span> <span class='ident'>c_size</span> <span class='op'>!=</span> <span class='ident'>e</span>.<span class='ident'>len</span>(){
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>MatrixError</span> :: <span class='ident'>MalformedMatrix</span>)
@@ -551,7 +553,8 @@
         })
     }
 
-    <span class='doccomment'>/// Create a matrix of zeros</span>
+
+    <span class='doccomment'>/// Create matrix with all zeros.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>zeros</span> (<span class='ident'>r_size</span> : <span class='ident'>usize</span>, <span class='ident'>c_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
         <span class='ident'>Matrix</span> {
             <span class='ident'>elements</span> : <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Zero</span>::<span class='ident'>zero</span>();<span class='ident'>r_size</span><span class='op'>*</span><span class='ident'>c_size</span>],
@@ -561,7 +564,7 @@
         }
     }
 
-    <span class='comment'>// Create a matrix of random elements.</span>
+    <span class='doccomment'>/// Create matrix with random elements.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>random</span>(<span class='ident'>r_size</span> : <span class='ident'>usize</span>, <span class='ident'>c_size</span> : <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>{
         <span class='kw'>let</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>rand</span>::<span class='ident'>thread_rng</span>()
         .<span class='ident'>gen_iter</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>()
@@ -577,6 +580,7 @@
     }
 
     <span class='doccomment'>/// Create a square diagonal matrix from a vector of elements.</span>
+
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>diag_mat</span> (<span class='ident'>a</span> : <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mat</span> <span class='op'>=</span> <span class='ident'>Matrix</span> :: <span class='ident'>zeros</span>(<span class='ident'>a</span>.<span class='ident'>len</span>(),<span class='ident'>a</span>.<span class='ident'>len</span>());
         <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>1</span>..<span class='ident'>a</span>.<span class='ident'>len</span>()<span class='op'>+</span><span class='number'>1</span>{
@@ -612,8 +616,8 @@
     }
 
 
-    <span class='doccomment'>/// Transpose the matrix. We&#39;re not actually changing anything in memory;</span>
-    <span class='comment'>// we just flag the matrix as transpose to change pointer reference to elements.</span>
+    <span class='doccomment'>/// Transpose the matrix.</span>
+    <span class='doccomment'>/// We&#39;re not actually changing anything in memory; we just flag the matrix as transpose to change pointer reference to elements.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>transpose</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Matrix</span> {
             <span class='ident'>elements</span> : <span class='self'>self</span>.<span class='ident'>elements</span>.<span class='ident'>clone</span>(),

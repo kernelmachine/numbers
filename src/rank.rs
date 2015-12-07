@@ -1,8 +1,6 @@
-// rcond, rank,
-//     det, invlndet,
 
 
-use super::{Matrix,Norm, Condition};
+use super::{Matrix,Norm, Condition, RectMat};
 
 use matrixerror::MatrixError;
 use lapack::*;
@@ -10,7 +8,22 @@ use factorizations::*;
 
 
 /// Calculate the norm of a matrix (1-Norm, Infinity-Norm, Frobenius Norm, or Max Absolute Value)
-pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
+///
+/// # Arguments
+///
+/// * `Matrix` - Matrix of type f64
+///
+/// # Example
+/// ```
+///#[macro_use] extern crate numbers;
+///use numbers::{Matrix, Norm};
+/// pub fn main(){
+/// let mut a = Matrix::new(vec![2.0,4.0,3.0,5.0], 2,2).ok().unwrap();
+/// let n = numbers::rank::norm(&mut a, Norm::InfinityNorm);
+/// assert!(8.0 - n < 1e-14)
+///}
+///```
+pub fn norm<T:RectMat>(a : &T, inorm : Norm) -> f64 {
     let norm = match inorm {
          Norm :: OneNorm => b'1',
          Norm :: InfinityNorm => b'I',
@@ -26,8 +39,23 @@ pub fn norm(a : &Matrix<f64>, inorm : Norm) -> f64 {
 
 }
 
-/// Get the number of linearly independent rows or columns. TODO: use QR
-pub fn rank(a : &mut Matrix<f64>) -> Result<usize, MatrixError> {
+/// Get the number of linearly independent rows or columns.
+///
+/// # Arguments
+///
+/// * `Matrix` - Matrix of type f64
+///
+/// # Example
+/// ```
+///#[macro_use] extern crate numbers;
+///use numbers::Matrix;
+/// pub fn main(){
+/// let mut a = Matrix::new(vec![1.0,2.0,1.0,2.0], 2,2).ok().unwrap();
+/// let n = numbers::rank::rank(&mut a).ok().unwrap();
+/// assert_eq!(1, n)
+///}
+///```
+pub fn rank<T: RectMat>(a : &mut T) -> Result<usize, MatrixError> {
 
     if let Ok(mut s) = singular_values(a) {
         let z = &mut s.elements;
@@ -39,7 +67,22 @@ pub fn rank(a : &mut Matrix<f64>) -> Result<usize, MatrixError> {
 }
 
 /// Determine the condition of a matrix via the condition number.
-pub fn cond(a : &mut Matrix <f64>, inorm : Norm) -> Result<Condition, MatrixError>{
+///
+/// # Arguments
+///
+/// * `Matrix` - Matrix of type f64
+///
+/// # Example
+/// ```
+///#[macro_use] extern crate numbers;
+///use numbers::{Matrix, Norm, Condition};
+/// pub fn main(){
+/// let mut a = Matrix::new(vec![5.0,10.0,1.0,2.01], 2,2).ok().unwrap();
+/// let c = numbers::rank::cond(&mut a, Norm :: InfinityNorm).ok().unwrap();
+/// assert_eq!(c, Condition::IllConditioned)
+///}
+///```
+pub fn cond<T: RectMat>(a : &mut T, inorm : Norm) -> Result<Condition, MatrixError>{
     let nm = match inorm {
          Norm :: OneNorm => b'1',
          Norm :: InfinityNorm => b'I',
