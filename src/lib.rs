@@ -31,15 +31,6 @@ use num::traits::{Num, Zero, One};
 use zipWith::IntoZipWith;
 
 
-enum MatrixTypes<T, U, R> where
-    T: RectMat,
-    U: SqMat,
-    R: NonSingularMat
-{
-    Rectangle(T),
-    Square(U),
-    NonSingularMat(R)
-}
 
 trait RectMat : Num + Rand + Clone{
     fn new(e : Vec<f64>, r_size : usize, c_size : usize) -> Result<   Self, MatrixError>;
